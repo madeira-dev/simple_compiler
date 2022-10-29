@@ -1,4 +1,25 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "geracodigo.h"
+
+typedef int (*funcp)();
+
+funcp geraCodigo(FILE *f, unsigned char codigo[]);
+static void error(const char *msg, int line);
+
+static void error(const char *msg, int line)
+{
+    fprintf(stderr, "erro %s na linha %d\n", msg, line);
+    exit(EXIT_FAILURE);
+}
+
+// funcp geraCodigo(FILE *f, unsigned char codigo[])
+// {
+// }
+
 // exemplo leitura e interpretacao do codigo SB
+
 /*#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -36,7 +57,7 @@ int main(void)
         }
         case 'v':
         case 'p':
-        { /* atribuiÃ§Ã£o e op. aritmetica
+        { /* atribuicao e op. aritmetica
             char var0 = c, var1, op;
             int idx0, idx1;
 
@@ -71,26 +92,3 @@ int main(void)
     return 0;
 }
 */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-typedef int (*funcp)();
-
-funcp geraCodigo(FILE *f, unsigned char codigo[]);
-
-int main(void)
-{
-    int tmp;
-    unsigned char opcode_array[tmp];
-
-    FILE *input_file = fopen("test_sb1", "rt");
-
-    geraCodigo(input_file, opcode_array);
-    return 0;
-}
-
-funcp geraCodigo(FILE *f, unsigned char codigo[])
-{
-}
