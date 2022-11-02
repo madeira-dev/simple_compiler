@@ -1,17 +1,12 @@
 dúvidas:
-	-> só existe uma função por arquivo SB?
 
-	-> ler usando fscanf ou fread?
-	
-	-> pode usar a função de erro no arquivo geracodigo.c?
-	
+	-> qual seria o tamanho apropriado do vetor do codigo?? não pode usar malloc, realloc....?????
+
+	-> só existe uma função por arquivo SB? 
+		
 	-> entender cada comando listado na sintaxe.
 
-	-> como alocar espaço na pilha para as variáveis locais? isso só na tradução de assembly pra codigo de maquina e
-	pegar o opcode dessa alocação de memória? oq acontece se nao alocar esse espaço???
-
-	-> o que eu quero com esse programa? rodar o codigo da linguagem SB? só pegar o código de máquina do código em SB??
-
+	/*
 	-> erro na traducao da terceira funcao para assembly; multiplicar variavel local por parametro
 		--> uma solucao foi alterar de *leaq* pra *leal* mas pode isso? nas instrucoes passadas pra turma só tem *leaq*
 			tem como corrigir sem alterar pra *leal*??
@@ -22,6 +17,7 @@ dúvidas:
 			do leaq já que Load Effective Address.
 		
 		--> como alterei pra *leal* ao invés de *leaq* usei um registrador de 32 bits, tem problema??
+	*/
 
 	-> dúvidas cases do switch:
 		--> O SWITCH DESTE ESBOÇO ESTÁ COBRINDO TODOS OS FORMATOS POSSIVEIS?? SE NAO, FALTA QUAL??
@@ -35,12 +31,39 @@ dúvidas:
 		--> case de parametros: mesmas dúvidas que para variáveis locais
 		
 		--> case de desvio condicional: a formatação do desvio condicional será sempre a mesma?? até nos testes realizados
-		por você, professor???
+			por você, professor???
 		
 		--> case de desvio incondicional: acho que não tem muito mistério, nenhuma pergunta.
 
-	-> tem alguma sacada específica do trabalho??
+		--> acho que o que precisa ser feito é: pra toda instrução lida, gerar o correspondente em assembly, de assembly
+			para código de máquina e dar append desse código de máquina no vetor a ser retornado
+
+	-> tem algum entendimento específico/difícil do trabalho??
 
 TODO:
+	- caso de variável local:
+		-- função pra gerar opcode de 1 variável local
+		-- função pra gerar opcode de 2 variáveis locais
+
 	- função pra dar append no array
-	- como calcula o opcode de cada instrução??
+
+	- função pra abrir espaço na pilha par variáveis locais
+	
+	- como calcula o opcode de cada instrução?? gerar instruções equivalentes em assembly e pegar o código de máquina deles??
+
+possível algoritmo:
+	- ao entrar no switch, inicializar vetor com opcode de pushq ... e movq ... ...;
+	- para variaveis locais: verificar se é a primeira ou não.
+		-- caso seja a primeira: incrementar no vetor opcode de subq ... e depois opcode da variavel local
+		-- caso não seja a primeira: alterar opcode do subq ... para um subq do tamanho necessario para as duas variaveis locais
+		e depois opcodes das variaveis locais, para alterar o valor do opcode, usar vetor auxiliar? apenas alterar o valor do elemento
+		no vetor mesmo??;
+	
+	- para parametros: verificar numero do parametro, caso seja o primeiro usar opcode de manipulacao da familia %rdi
+		se nao for o primeiro, usar opcode de manipulacao da familia %rsi
+	
+	- para retorno: verificar qual variavel está sendo retornada, passar ela para o %eax e entao, leave/ret
+
+	- para desvio condicional: <COMPLETE>
+
+	- para desvio incondicional: <COMPLETE>
