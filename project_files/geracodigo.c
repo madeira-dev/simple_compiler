@@ -20,8 +20,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     funcp func;
     int line = 1;
     int c;
-    unsigned char *tmp_arr; /* array local temporaria para adicionar os opcodes e depois passar para array do parametro */
-    tmp_arr = (unsigned char *)malloc(4 * sizeof(unsigned char));
+    unsigned char tmp_arr[512]; /* array local temporaria para adicionar os opcodes e depois passar para array do parametro */
     tmp_arr[0] = 0x55;
     tmp_arr[1] = 0x48;
     tmp_arr[2] = 0x89;
@@ -30,9 +29,6 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     // int length = sizeof(tmp_arr) / sizeof(tmp_arr[0]);
 
     int length = 4; /* se necessário alterar do hard-coded */
-
-    codigo = (unsigned char *)malloc(4 * sizeof(unsigned char));
-    codigo = tmp_arr;
 
     while ((c = fgetc(f)) != EOF)
     {
@@ -48,12 +44,6 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             if (fscanf(f, "et %c%d", &var0, &idx0) != 2)
                 error("comando invalido", line);
 
-            /* debug printf */
-            printf("\ntmp:\n");
-            for (int i = 0; i < length; i++)
-                printf("[%x] ", tmp_arr[i]);
-            printf("\n");
-
             /* caso retornar parametro */
             if (var0 == 'p')
             {
@@ -64,12 +54,6 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 for (int i = 0; i < length; i++)
                     aux_arr[i] = tmp_arr[i];
 
-                /* debug printf */
-                printf("\naux:\n");
-                for (int i = 0; i < length + 4; i++)
-                    printf("[%x] ", aux_arr[i]);
-                printf("\n");
-
                 /* caso seja primeiro parametro (familia rdi) */
                 if (idx0 == 1)
                 {
@@ -79,22 +63,8 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                     aux_arr[(length + 4) - 2] = 0xc9; /* leave */
                     aux_arr[(length + 4) - 1] = 0xc3; /* ret */
 
-                    /* debug printf */
-                    printf("\naux preenchido:\n");
-                    for (int i = 0; i < length + 4; i++)
-                        printf("[%x] ", aux_arr[i]);
-                    printf("\n");
-
-                    codigo = (unsigned char *)realloc(codigo, (length + 4) * sizeof(unsigned char));
-
                     for (int i = 0; i < length + 4; i++)
                         codigo[i] = aux_arr[i];
-
-                    /* debug printf */
-                    printf("\ncodigo updated:\n");
-                    for (int i = 0; i < length + 4; i++)
-                        printf("[%x] ", codigo[i]);
-                    printf("\n");
                 }
 
                 /* caso seja segundo parametro (familia rsi) */
@@ -192,8 +162,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         line++;
         fscanf(f, " ");
     }
-
-    // (*func)();
+    func = (funcp)codigo;
     return func;
 }
 
