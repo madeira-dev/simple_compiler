@@ -1,9 +1,9 @@
 #include <stdio.h>
 
-int test1(int num);
+int ret_test4();
 
 int main(void)
 {
-    printf("%d\n", test1(1));
+    printf("%d\n", ret_test4());
     return 0;
 }

@@ -9,7 +9,7 @@ int main(void)
     unsigned char opcode_array[512];
     FILE *myfp;
 
-    if ((myfp = fopen("sb_code1.txt", "rt")) == NULL)
+    if ((myfp = fopen("test_ret_p2.txt", "rt")) == NULL)
     {
         perror("nao conseguiu abrir arquivo!");
         exit(1);
@@ -18,7 +18,7 @@ int main(void)
     func = (funcp)geraCodigo(myfp, opcode_array);
     fclose(myfp);
 
-    check = (*func)();
+    check = (*func)(100, 200);
     printf("%d\n", check);
 
     return 0;

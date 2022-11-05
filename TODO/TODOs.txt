@@ -1,10 +1,13 @@
 dúvidas:
 
 	-> qual seria o tamanho apropriado do vetor do codigo?? não pode usar malloc, realloc....?????
+		-- não existe exatamente um tamanho adequado, o adequado seria um tamanho que caiba todos os opcodes
+			das instruções, então 512 deve ser o suficiente. evitar usar malloc entre funções por desviar o
+			endereço de memória apontada
 
-	-> só existe uma função por arquivo SB? 
+	-> só existe uma função por arquivo SB? *sim*
 		
-	-> entender cada comando listado na sintaxe.
+	-> entender cada comando listado na sintaxe. *entendi*
 
 	/*
 	-> erro na traducao da terceira funcao para assembly; multiplicar variavel local por parametro
@@ -22,7 +25,7 @@ dúvidas:
 	-> dúvidas cases do switch:
 		--> O SWITCH DESTE ESBOÇO ESTÁ COBRINDO TODOS OS FORMATOS POSSIVEIS?? SE NAO, FALTA QUAL??
 		
-		--> case de retorno: colocar o opcode apenas de ret no array ou opcode de leave E DE ret???
+		--> case de retorno: colocar o opcode apenas de ret no array ou opcode de leave E DE ret??? leave E ret
 		
 		--> case de variavel local: no fscanf, a string formatada sempre considera um sinal de '=', alterar isso para
 			casos como '+=' ou não??

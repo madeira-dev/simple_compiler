@@ -5,6 +5,7 @@
 
 #define true 1
 #define false 0
+#define ARR_SIZE 512
 
 // typedef
 typedef int (*funcp)();
@@ -12,23 +13,18 @@ typedef int (*funcp)();
 // prototypes
 funcp geraCodigo(FILE *f, unsigned char codigo[]);
 static void error(const char *msg, int line);
-int is_empty(unsigned char arr[]);
+unsigned char *update_arr_with_var(unsigned char arr[], int var_id, int line);
 
 // code
 funcp geraCodigo(FILE *f, unsigned char codigo[])
 {
     funcp func;
     int line = 1;
-    int c;
-    unsigned char tmp_arr[512]; /* array local temporaria para adicionar os opcodes e depois passar para array do parametro */
-    tmp_arr[0] = 0x55;
-    tmp_arr[1] = 0x48;
-    tmp_arr[2] = 0x89;
-    tmp_arr[3] = 0xe5;
-    /* por estar usando malloc n é possível pegar o length do array com a linha de baixo?? */
-    // int length = sizeof(tmp_arr) / sizeof(tmp_arr[0]);
-
-    int length = 4; /* se necessário alterar do hard-coded */
+    int c, init_length = 4, length; /* se necessário alterar o hard code de init_length */
+    unsigned char tmp_arr[ARR_SIZE] = {0x55,
+                                       0x48, 0x89, 0xe5}; /* array local temporaria para adicionar os opcodes e depois passar para array do parametro */
+    length = sizeof(tmp_arr) / sizeof(tmp_arr[0]);
+    printf("SIZE: %d\n", length);
 
     while ((c = fgetc(f)) != EOF)
     {
@@ -47,23 +43,23 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             /* caso retornar parametro */
             if (var0 == 'p')
             {
-                aux_arr = (unsigned char *)malloc((length + 4) * sizeof(unsigned char)); /* array auxiliar pra aumentar o tamanho do array inicial */
+                aux_arr = (unsigned char *)malloc((init_length + 4) * sizeof(unsigned char)); /* array auxiliar pra aumentar o tamanho do array inicial */
                 /* somando 4 no tamanho original pois: (mov parametro, eax) ocupa 2 bytes; leave ocupa 1 byte; ret ocupa 1 byte */
 
                 /* passando elementos pra array auxiliar */
-                for (int i = 0; i < length; i++)
+                for (int i = 0; i < init_length; i++)
                     aux_arr[i] = tmp_arr[i];
 
                 /* caso seja primeiro parametro (familia rdi) */
                 if (idx0 == 1)
                 {
                     /* (mov edi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-                    aux_arr[(length + 4) - 4] = 0x89; /* primeiro byte do mov */
-                    aux_arr[(length + 4) - 3] = 0xf8; /* segundo byte do mov */
-                    aux_arr[(length + 4) - 2] = 0xc9; /* leave */
-                    aux_arr[(length + 4) - 1] = 0xc3; /* ret */
+                    aux_arr[(init_length + 4) - 4] = 0x89; /* primeiro byte do mov */
+                    aux_arr[(init_length + 4) - 3] = 0xf8; /* segundo byte do mov */
+                    aux_arr[(init_length + 4) - 2] = 0xc9; /* leave */
+                    aux_arr[(init_length + 4) - 1] = 0xc3; /* ret */
 
-                    for (int i = 0; i < length + 4; i++)
+                    for (int i = 0; i < init_length + 4; i++)
                         codigo[i] = aux_arr[i];
                 }
 
@@ -71,6 +67,13 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 else
                 {
                     /* (mov esi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
+                    aux_arr[(init_length + 4) - 4] = 0x89; /* primeiro byte do mov */
+                    aux_arr[(init_length + 4) - 3] = 0xf0; /* segundo byte do mov */
+                    aux_arr[(init_length + 4) - 2] = 0xc9; /* leave */
+                    aux_arr[(init_length + 4) - 1] = 0xc3; /* ret */
+
+                    for (int i = 0; i < init_length + 4; i++)
+                        codigo[i] = aux_arr[i];
                 }
             }
 
@@ -162,6 +165,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         line++;
         fscanf(f, " ");
     }
+
     func = (funcp)codigo;
     return func;
 }
@@ -172,7 +176,54 @@ static void error(const char *msg, int line)
     exit(EXIT_FAILURE);
 }
 
-int is_empty(unsigned char arr[])
+unsigned char *update_arr_with_var(unsigned char arr[], int var_id, int line)
 {
-    return arr[0] == 0x0 ? true : false;
+    unsigned char tmp_arr[ARR_SIZE];
+    switch (var_id)
+    {
+    case 1: /* rdx */
+        unsigned char arr_1var[ARR_SIZE] = {0x55,
+                                            0x48, 0x89, 0xe5,
+                                            0x48, 0x83, 0xec, 0x10,
+                                            0x48, 0x8d, 0x55, 0xf0};
+
+        for (int i = 5, j = 0; i < ARR_SIZE, i != 0x0; i++, j++)
+        {
+            tmp_arr[j] = arr[i];
+        }
+        return arr_1var;
+        break;
+
+    case 2: /* rdx e rcx */
+        unsigned char arr_2var[ARR_SIZE] = {0x55,
+                                            0x48, 0x89, 0xe5,
+                                            0x48, 0x83, 0xec, 0x10,
+                                            0x48, 0x8d, 0x55, 0xf0,
+                                            0x48, 0x8d, 0x4d, 0xf8};
+        return arr_2var;
+        break;
+    case 3: /* rdx, rcx e r8 */
+        unsigned char arr_3var[ARR_SIZE] = {0x55,
+                                            0x48, 0x89, 0xe5,
+                                            0x48, 0x83, 0xec, 0x20,
+                                            0x48, 0x8d, 0x55, 0xe0,
+                                            0x48, 0x8d, 0x4d, 0xe8,
+                                            0x4c, 0x8d, 0x45, 0xf0};
+        return arr_3var;
+        break;
+
+    case 4: /* rdx, rcx, r8 e r9 */
+        unsigned char arr_4var[ARR_SIZE] = {0x55,
+                                            0x48, 0x89, 0xe5,
+                                            0x48, 0x83, 0xec, 0x20,
+                                            0x48, 0x8d, 0x55, 0xe0,
+                                            0x48, 0x8d, 0x4d, 0xe8,
+                                            0x4c, 0x8d, 0x45, 0xf0,
+                                            0x4c, 0x8d, 0x4d, 0xf8};
+        return arr_4var;
+        break;
+
+    default:
+        error("número de variável local incorreto", line);
+    }
 }
