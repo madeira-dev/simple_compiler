@@ -54,10 +54,10 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 if (idx0 == 1)
                 {
                     /* (mov edi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-                    aux_arr[(init_length + 4) - 4] = 0x89; /* primeiro byte do mov */
-                    aux_arr[(init_length + 4) - 3] = 0xf8; /* segundo byte do mov */
-                    aux_arr[(init_length + 4) - 2] = 0xc9; /* leave */
-                    aux_arr[(init_length + 4) - 1] = 0xc3; /* ret */
+                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov */
+                    aux_arr[init_length + 1] = 0xf8; /* segundo byte do mov */
+                    aux_arr[init_length + 2] = 0xc9; /* leave */
+                    aux_arr[init_length + 3] = 0xc3; /* ret */
 
                     for (int i = 0; i < init_length + 4; i++)
                         codigo[i] = aux_arr[i];
@@ -67,10 +67,10 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 else
                 {
                     /* (mov esi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-                    aux_arr[(init_length + 4) - 4] = 0x89; /* primeiro byte do mov */
-                    aux_arr[(init_length + 4) - 3] = 0xf0; /* segundo byte do mov */
-                    aux_arr[(init_length + 4) - 2] = 0xc9; /* leave */
-                    aux_arr[(init_length + 4) - 1] = 0xc3; /* ret */
+                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov */
+                    aux_arr[init_length + 1] = 0xf0; /* segundo byte do mov */
+                    aux_arr[init_length + 2] = 0xc9; /* leave */
+                    aux_arr[init_length + 3] = 0xc3; /* ret */
 
                     for (int i = 0; i < init_length + 4; i++)
                         codigo[i] = aux_arr[i];
@@ -176,50 +176,87 @@ static void error(const char *msg, int line)
     exit(EXIT_FAILURE);
 }
 
+/* retona array com o "cabeçalho" atualizado de acordo com a quantidade de variáveis locais */
 unsigned char *update_arr_with_var(unsigned char arr[], int var_id, int line)
 {
     unsigned char tmp_arr[ARR_SIZE];
     switch (var_id)
     {
-    case 1: /* rdx */
-        unsigned char arr_1var[ARR_SIZE] = {0x55,
-                                            0x48, 0x89, 0xe5,
-                                            0x48, 0x83, 0xec, 0x10,
+    case 1 /* rdx */:
+        unsigned char arr_1var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
+                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
+                                            0x48, 0x83, 0xec, 0x10, /* subq $16, %rsp */
                                             0x48, 0x8d, 0x55, 0xf0};
 
-        for (int i = 5, j = 0; i < ARR_SIZE, i != 0x0; i++, j++)
+        int old_arr_size = 4;  /* numero de opcodes ocupados para cabecalho se não tiver variavel local */
+        int new_arr_size = 12; /* numero de opcodes ocupados para cabecalho de 1 variavel local */
+
+        /* for loop pra passar informacoes, exceto cabecalho, do array original pro novo array com cabecalho pra 1 variavel local */
+        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
         {
-            tmp_arr[j] = arr[i];
+            arr_1var[i] = arr[j];
         }
+
         return arr_1var;
         break;
 
-    case 2: /* rdx e rcx */
-        unsigned char arr_2var[ARR_SIZE] = {0x55,
-                                            0x48, 0x89, 0xe5,
-                                            0x48, 0x83, 0xec, 0x10,
+    case 2 /* rdx e rcx */:
+        unsigned char arr_2var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
+                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
+                                            0x48, 0x83, 0xec, 0x10, /* subq $16, %rsp */
                                             0x48, 0x8d, 0x55, 0xf0,
                                             0x48, 0x8d, 0x4d, 0xf8};
+
+        int old_arr_size = 12; /* numero de opcodes ocupados para cabecalho de 1 variaveis locais */
+        int new_arr_size = 16; /* numero de opcodes ocupados para cabecalho de 2 variaveis locais */
+
+        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
+        {
+            arr_2var[i] = arr[j];
+        }
+
+        /* se for a segunda variável local, iterar até opcode de alocacao da primeira variavel local (leaq xxx??) */
         return arr_2var;
         break;
-    case 3: /* rdx, rcx e r8 */
-        unsigned char arr_3var[ARR_SIZE] = {0x55,
-                                            0x48, 0x89, 0xe5,
-                                            0x48, 0x83, 0xec, 0x20,
+
+    case 3 /* rdx, rcx e r8 */:
+        unsigned char arr_3var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
+                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
+                                            0x48, 0x83, 0xec, 0x20, /* subq $32, %rsp*/
                                             0x48, 0x8d, 0x55, 0xe0,
                                             0x48, 0x8d, 0x4d, 0xe8,
                                             0x4c, 0x8d, 0x45, 0xf0};
+
+        int old_arr_size = 16; /* numero de opcodes ocupados para cabecalho de 2 variaveis locais */
+        int new_arr_size = 20; /* numero de opcodes ocupados para cabecalho de 3 variaveis locais */
+
+        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
+        {
+            arr_3var[i] = arr[j];
+        }
+
+        /* se for a terceira variável local, iterar até opcode de alocacao da segunda variavel local (leaq xxx??) */
         return arr_3var;
         break;
 
-    case 4: /* rdx, rcx, r8 e r9 */
-        unsigned char arr_4var[ARR_SIZE] = {0x55,
-                                            0x48, 0x89, 0xe5,
-                                            0x48, 0x83, 0xec, 0x20,
+    case 4 /* rdx, rcx, r8 e r9 */:
+        unsigned char arr_4var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
+                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
+                                            0x48, 0x83, 0xec, 0x20, /* subq $32, %rsp*/
                                             0x48, 0x8d, 0x55, 0xe0,
                                             0x48, 0x8d, 0x4d, 0xe8,
                                             0x4c, 0x8d, 0x45, 0xf0,
                                             0x4c, 0x8d, 0x4d, 0xf8};
+
+        int old_arr_size = 20; /* numero de opcodes ocupados para cabecalho de 3 variaveis locais */
+        int new_arr_size = 24; /* numero de opcodes ocupados para cabecalho de 4 variavel local */
+
+        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
+        {
+            arr_4var[i] = arr[j];
+        }
+
+        /* se for a quarta variável local, iterar até opcode de alocacao da terceira variavel local (leaq xxx??) */
         return arr_4var;
         break;
 
