@@ -5,7 +5,7 @@
 
 #define true 1
 #define false 0
-#define ARR_SIZE 512
+#define ARR_SIZE 1024
 
 // typedef
 typedef int (*funcp)();
@@ -20,9 +20,14 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 {
     funcp func;
     int line = 1;
-    int c, init_length = 4, length; /* se necessário alterar o hard code de init_length */
-    unsigned char tmp_arr[ARR_SIZE] = {0x55,
-                                       0x48, 0x89, 0xe5}; /* array local temporaria para adicionar os opcodes e depois passar para array do parametro */
+    int c, init_length = 4, length;          /* se necessário alterar o hard code de init_length */
+    unsigned char tmp_arr[ARR_SIZE] = {0x55, /* array inicializado com codigos de maquina de iniciar ra, abrir espaco no ra e alocar variaveis locais */
+                                       0x48, 0x89, 0xe5,
+                                       0x48, 0x83, 0xec, 0x20,
+                                       0x48, 0x8d, 0x55, 0xe0,
+                                       0x48, 0x8d, 0x4d, 0xe8,
+                                       0x4c, 0x8d, 0x45, 0xf0,
+                                       0x4c, 0x8d, 0x4d, 0xf8};
     length = sizeof(tmp_arr) / sizeof(tmp_arr[0]);
 
     while ((c = fgetc(f)) != EOF)
@@ -34,7 +39,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         {
             char var0; /* representa qual variavel: local ou parametro */
             int idx0;  /* numero da variavel retornada 1 ou 2 */
-            unsigned char aux_arr[512];
+            unsigned char aux_arr[ARR_SIZE];
 
             if (fscanf(f, "et %c%d", &var0, &idx0) != 2)
                 error("comando invalido", line);
@@ -44,15 +49,15 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             {
 
                 /* passando elementos pra array auxiliar */
-                for (int i = 0; i < init_length; i++)
+                for (int i = 0; i < init_length; i++) /* ja q o tamanho é fixo nao preciso mais desse auxiliar eu acho */
                     aux_arr[i] = tmp_arr[i];
 
                 /* caso seja primeiro parametro (familia rdi) */
                 if (idx0 == 1)
                 {
                     /* (mov edi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov */
-                    aux_arr[init_length + 1] = 0xf8; /* segundo byte do mov */
+                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov  edi, eax */
+                    aux_arr[init_length + 1] = 0xf8; /* segundo byte do mov edi, eax */
                     aux_arr[init_length + 2] = 0xc9; /* leave */
                     aux_arr[init_length + 3] = 0xc3; /* ret */
 
@@ -64,8 +69,8 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 else
                 {
                     /* (mov esi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov */
-                    aux_arr[init_length + 1] = 0xf0; /* segundo byte do mov */
+                    aux_arr[init_length] = 0x89;     /* primeiro byte do mov esi, eax */
+                    aux_arr[init_length + 1] = 0xf0; /* segundo byte do mov esi, eax */
                     aux_arr[init_length + 2] = 0xc9; /* leave */
                     aux_arr[init_length + 3] = 0xc3; /* ret */
 
