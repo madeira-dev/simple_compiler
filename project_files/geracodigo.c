@@ -13,14 +13,14 @@ typedef int (*funcp)();
 // prototypes
 funcp geraCodigo(FILE *f, unsigned char codigo[]);
 static void error(const char *msg, int line);
-void update_arr_with_var(unsigned char arr[], int var_id, int line);
+void update_arr_with_var(unsigned char arr[], int var_id, int line, int arr_size);
 
 // code
 funcp geraCodigo(FILE *f, unsigned char codigo[])
 {
     funcp func;
     int line = 1;
-    int c, init_length = 4, length;          /* se necessário alterar o hard code de init_length */
+    int c, init_length = 24, length;         /* se necessário alterar o hard code de init_length */
     unsigned char tmp_arr[ARR_SIZE] = {0x55, /* array inicializado com codigos de maquina de iniciar ra, abrir espaco no ra e alocar variaveis locais */
                                        0x48, 0x89, 0xe5,
                                        0x48, 0x83, 0xec, 0x20,
@@ -89,7 +89,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja a primeira variavel local */
                 if (idx0 == 1)
                 {
-                    update_arr_with_var(aux_arr, idx0, line);
+                    update_arr_with_var(aux_arr, idx0, line, init_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = aux_arr[i];
@@ -98,7 +98,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja a segunda variavel local */
                 else if (idx0 == 2)
                 {
-                    update_arr_with_var(aux_arr, idx0, line);
+                    update_arr_with_var(aux_arr, idx0, line, init_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = aux_arr[i];
@@ -107,7 +107,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja a terceira variavel local */
                 else if (idx0 == 3)
                 {
-                    update_arr_with_var(aux_arr, idx0, line);
+                    update_arr_with_var(aux_arr, idx0, line, init_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = aux_arr[i];
@@ -116,7 +116,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja a quarta variavel local */
                 else
                 {
-                    update_arr_with_var(aux_arr, idx0, line);
+                    update_arr_with_var(aux_arr, idx0, line, init_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = aux_arr[i];
@@ -198,145 +198,73 @@ static void error(const char *msg, int line)
 }
 
 /* atualizar "cabecalho" do array de acordo com a quantidade de variáveis locais */
-void update_arr_with_var(unsigned char arr[], int idx0, int line)
+void update_arr_with_var(unsigned char arr[], int idx0, int line, int arr_size)
 {
     unsigned char tmp_arr[ARR_SIZE];
-    int old_arr_size, new_arr_size;
 
     switch (idx0)
     {
     case 1 /* rdx */:
-        unsigned char arr_1var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
-                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
-                                            0x48, 0x83, 0xec, 0x10, /* subq $16, %rsp */
-                                            0x48, 0x8d, 0x55, 0xf0};
 
-        old_arr_size = 4;  /* numero de opcodes ocupados para cabecalho se não tiver variavel local */
-        new_arr_size = 12; /* numero de opcodes ocupados para cabecalho de 1 variavel local */
-
-        /* passando todo o cabecalho pra array temporario */
-        for (int i = 0; i < new_arr_size; i++)
-            tmp_arr[i] = arr_1var[i];
-        /* adicionando no array temporario todos os opcodes do array original com o cabecalho certo */
-        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
-            tmp_arr[i] = arr[j];
-        /* atualizar array original com array de cabecalho novo */
-        for (int i = 0; i < ARR_SIZE; i++)
-            arr[i] = tmp_arr[i];
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para testes */
-        arr[new_arr_size] = 0xba;
-        arr[new_arr_size + 1] = 0xc8;
-        arr[new_arr_size + 2] = 0x00;
-        arr[new_arr_size + 3] = 0x00;
-        arr[new_arr_size + 4] = 0x00;
-        arr[new_arr_size + 5] = 0x89;
-        arr[new_arr_size + 6] = 0xd0;
-        arr[new_arr_size + 7] = 0xc9;
-        arr[new_arr_size + 8] = 0xc3;
-        /* fim do preenchimento do array para teste. REMOVER DEPOIS */
+        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
+        arr[arr_size] = 0xba;
+        arr[arr_size + 1] = 0xc8; // daqui
+        arr[arr_size + 2] = 0x00;
+        arr[arr_size + 3] = 0x00;
+        arr[arr_size + 4] = 0x00; // até aqui é codigo de maquina no mov 200, edx (remover depois)
+        arr[arr_size + 5] = 0x89;
+        arr[arr_size + 6] = 0xd0;
+        arr[arr_size + 7] = 0xc9;
+        arr[arr_size + 8] = 0xc3;
 
         break;
 
     case 2 /* rdx e rcx */:
-        unsigned char arr_2var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
-                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
-                                            0x48, 0x83, 0xec, 0x10, /* subq $16, %rsp */
-                                            0x48, 0x8d, 0x55, 0xf0,
-                                            0x48, 0x8d, 0x4d, 0xf8};
 
-        old_arr_size = 12; /* numero de opcodes ocupados para cabecalho de 1 variaveis locais */
-        new_arr_size = 16; /* numero de opcodes ocupados para cabecalho de 2 variaveis locais */
-
-        for (int i = 0; i < new_arr_size; i++)
-            tmp_arr[i] = arr_2var[i];
-        /* adicionando no array temporario todos os opcodes do array original com o cabecalho certo */
-        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
-            tmp_arr[i] = arr[j];
-        /* atualizar array original com array de cabecalho novo */
-        for (int i = 0; i < ARR_SIZE; i++)
-            arr[i] = tmp_arr[i];
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para testes */
-        arr[new_arr_size] = 0xb9;
-        arr[new_arr_size + 1] = 0xc8;
-        arr[new_arr_size + 2] = 0x00;
-        arr[new_arr_size + 3] = 0x00;
-        arr[new_arr_size + 4] = 0x00;
-        arr[new_arr_size + 5] = 0x89;
-        arr[new_arr_size + 6] = 0xc8;
-        arr[new_arr_size + 7] = 0xc9;
-        arr[new_arr_size + 8] = 0xc3;
-        /* fim do preenchimento do array para teste. REMOVER DEPOIS */
+        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
+        arr[arr_size] = 0xb9;
+        arr[arr_size + 1] = 0xc8; // daqui
+        arr[arr_size + 2] = 0x00;
+        arr[arr_size + 3] = 0x00;
+        arr[arr_size + 4] = 0x00; // até aqui (remover depois)
+        arr[arr_size + 5] = 0x89;
+        arr[arr_size + 6] = 0xc8;
+        arr[arr_size + 7] = 0xc9;
+        arr[arr_size + 8] = 0xc3;
 
         break;
 
     case 3 /* rdx, rcx e r8 */:
-        unsigned char arr_3var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
-                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
-                                            0x48, 0x83, 0xec, 0x20, /* subq $32, %rsp*/
-                                            0x48, 0x8d, 0x55, 0xe0,
-                                            0x48, 0x8d, 0x4d, 0xe8,
-                                            0x4c, 0x8d, 0x45, 0xf0};
 
-        old_arr_size = 16; /* numero de opcodes ocupados para cabecalho de 2 variaveis locais */
-        new_arr_size = 20; /* numero de opcodes ocupados para cabecalho de 3 variaveis locais */
-
-        for (int i = 0; i < new_arr_size; i++)
-            tmp_arr[i] = arr_3var[i];
-        /* adicionando no array temporario todos os opcodes do array original com o cabecalho certo */
-        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
-            tmp_arr[i] = arr[j];
-        /* atualizar array original com array de cabecalho novo */
-        for (int i = 0; i < ARR_SIZE; i++)
-            arr[i] = tmp_arr[i];
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para testes */
-        arr[new_arr_size] = 0xb9;
-        arr[new_arr_size + 1] = 0xc8;
-        arr[new_arr_size + 2] = 0x00;
-        arr[new_arr_size + 3] = 0x00;
-        arr[new_arr_size + 4] = 0x00;
-        arr[new_arr_size + 5] = 0x89;
-        arr[new_arr_size + 6] = 0xc8;
-        arr[new_arr_size + 7] = 0xc9;
-        arr[new_arr_size + 8] = 0xc3;
-        /* fim do preenchimento do array para teste. REMOVER DEPOIS */
+        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
+        arr[arr_size] = 0x41;
+        arr[arr_size + 1] = 0xb8;
+        arr[arr_size + 2] = 0xc8; // daqui
+        arr[arr_size + 3] = 0x00;
+        arr[arr_size + 4] = 0x00;
+        arr[arr_size + 5] = 0x00; // ate aqui (remover depois)
+        arr[arr_size + 6] = 0x44;
+        arr[arr_size + 7] = 0x89;
+        arr[arr_size + 8] = 0xc0;
+        arr[arr_size + 9] = 0xc9;
+        arr[arr_size + 10] = 0xc3;
 
         break;
 
     case 4 /* rdx, rcx, r8 e r9 */:
-        unsigned char arr_4var[ARR_SIZE] = {0x55,                   /* pushq %rbp */
-                                            0x48, 0x89, 0xe5,       /* movq %rsp, %rbp*/
-                                            0x48, 0x83, 0xec, 0x20, /* subq $32, %rsp*/
-                                            0x48, 0x8d, 0x55, 0xe0,
-                                            0x48, 0x8d, 0x4d, 0xe8,
-                                            0x4c, 0x8d, 0x45, 0xf0,
-                                            0x4c, 0x8d, 0x4d, 0xf8};
 
-        old_arr_size = 20; /* numero de opcodes ocupados para cabecalho de 3 variaveis locais */
-        new_arr_size = 24; /* numero de opcodes ocupados para cabecalho de 4 variavel local */
-
-        for (int i = 0; i < new_arr_size; i++)
-            tmp_arr[i] = arr_4var[i];
-        /* adicionando no array temporario todos os opcodes do array original com o cabecalho certo */
-        for (int i = new_arr_size, j = old_arr_size; i < ARR_SIZE; i++, j++)
-            tmp_arr[i] = arr[j];
-        /* atualizar array original com array de cabecalho novo */
-        for (int i = 0; i < ARR_SIZE; i++)
-            arr[i] = tmp_arr[i];
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para testes */
-        arr[new_arr_size] = 0xb9;
-        arr[new_arr_size + 1] = 0xc8;
-        arr[new_arr_size + 2] = 0x00;
-        arr[new_arr_size + 3] = 0x00;
-        arr[new_arr_size + 4] = 0x00;
-        arr[new_arr_size + 5] = 0x89;
-        arr[new_arr_size + 6] = 0xc8;
-        arr[new_arr_size + 7] = 0xc9;
-        arr[new_arr_size + 8] = 0xc3;
-        /* fim do preenchimento do array para teste. REMOVER DEPOIS */
+        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
+        arr[arr_size] = 0x41;
+        arr[arr_size + 1] = 0xb9;
+        arr[arr_size + 2] = 0xc8; // daqui
+        arr[arr_size + 3] = 0x00;
+        arr[arr_size + 4] = 0x00;
+        arr[arr_size + 5] = 0x00; // ate aqui (remover depois)
+        arr[arr_size + 6] = 0x44;
+        arr[arr_size + 7] = 0x89;
+        arr[arr_size + 8] = 0xc8;
+        arr[arr_size + 9] = 0xc9;
+        arr[arr_size + 10] = 0xc3;
 
         break;
 

@@ -6,7 +6,7 @@ int main(void)
 {
     funcp func;
     int check;
-    unsigned char opcode_array[512];
+    unsigned char opcode_array[1024];
     FILE *myfp;
 
     if ((myfp = fopen("test_ret_v4.txt", "rt")) == NULL)

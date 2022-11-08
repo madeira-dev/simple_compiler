@@ -7,9 +7,10 @@ ret_test5:
     leaq -32(%rbp), %rdx
     leaq -24(%rbp), %rcx
     leaq -16(%rbp), %r8
+    leaq -8(%rbp), %r9
 
-    movl $200, %ecx
-    movl %ecx, %eax
+    movl $200, %r8d
+    movl %r8d, %eax
 
     leave
     ret
