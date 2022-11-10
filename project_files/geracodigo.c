@@ -10,8 +10,8 @@
 typedef int (*funcp)();
 
 // prototypes
-void add_var_ret_machineCode(unsigned char arr[], int var_id, int line, int arr_size); /* pensar em um nome melhor pra essa função */
-void add_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size); /* pensar em um nome melhor pra essa função */
+void append_var_ret_machineCode(unsigned char arr[], int var_id, int line, int arr_size); /* pensar em um nome melhor pra essa função */
+void append_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size); /* pensar em um nome melhor pra essa função */
 static void error(const char *msg, int line);
 
 // code
@@ -47,7 +47,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 if (idx0 == 1)
                 {
 
-                    add_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < curr_length + 4; i++)
                         codigo[i] = tmp_arr[i];
@@ -55,7 +55,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja segundo parametro (familia rsi) */
                 else
                 {
-                    add_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < curr_length + 4; i++)
                         codigo[i] = tmp_arr[i];
@@ -67,7 +67,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a primeira variavel local */
                 if (idx0 == 1)
                 {
-                    add_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -75,7 +75,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a segunda variavel local */
                 else if (idx0 == 2)
                 {
-                    add_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -83,7 +83,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a terceira variavel local */
                 else if (idx0 == 3)
                 {
-                    add_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -91,7 +91,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a quarta variavel local */
                 else
                 {
-                    add_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -167,7 +167,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 }
 
 /* atualizar "cabecalho" do array de acordo com a quantidade de variáveis locais */
-void add_var_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
+void append_var_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
 {
     /* talvez precise usar esse tmp_arr depois que implementar função para contar quantidade de machine codes que estão sendo usados */
     // unsigned char tmp_arr[ARR_SIZE];
@@ -243,7 +243,7 @@ void add_var_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_si
     }
 }
 
-void add_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
+void append_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
 {
     /* caso seja primeiro parametro (familia rdi) */
     if (idx0 == 1)
