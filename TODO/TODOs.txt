@@ -14,9 +14,7 @@ dúvidas:
 		
 		--> case de retorno: colocar o opcode apenas de ret no array ou opcode de leave E DE ret??? *leave E ret*
 		
-		--> case de variavel local: no fscanf, a string formatada sempre considera um sinal de '=', alterar isso para
-			casos como '+=' ou não??
-			- if/else pra cada sinal de operação??
+		--> case de variavel local: if/else pra cada sinal de operação??
 		
 		--> case de parametros: mesmas dúvidas que para variáveis locais
 		

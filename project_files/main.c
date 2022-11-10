@@ -9,7 +9,7 @@ int main(void)
     unsigned char opcode_array[1024];
     FILE *myfp;
 
-    if ((myfp = fopen("test_ret_p2.txt", "rt")) == NULL)
+    if ((myfp = fopen("../tests/test_ret_p2.txt", "rt")) == NULL)
     {
         perror("nao conseguiu abrir arquivo!");
         exit(1);

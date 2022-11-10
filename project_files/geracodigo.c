@@ -6,15 +6,23 @@
 #define ARR_SIZE 1024  /* tamanho máximo do vetor */
 #define INIT_LENGTH 24 /* tamanho inicial do array sempre iniciado com codigo de maquina de: iniciar RA, abrir espaço no RA e alocar variáveis locais */
 
-// typedef
+/* typedef */
 typedef int (*funcp)();
 
-// prototypes
-void append_var_ret_machineCode(unsigned char arr[], int var_id, int line, int arr_size); /* pensar em um nome melhor pra essa função */
-void append_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size); /* pensar em um nome melhor pra essa função */
+/* functions prototypes */
+// return
+void return_var(unsigned char arr[], int var_id, int line, int arr_size);     /* pensar em um nome melhor pra essa função */
+void return_parameter(unsigned char arr[], int idx0, int line, int arr_size); /* pensar em um nome melhor pra essa função */
+
+// var manipulation
+void var_add_operation(char var0, int idx0, char var1, int idx1, char op, int line);
+void var_sub_operation(char var0, int idx0, char var1, int idx1, char op, int line);
+void var_mult_operation(char var0, int idx0, char var1, int idx1, char op, int line);
+
+// error
 static void error(const char *msg, int line);
 
-// code
+/* code */
 funcp geraCodigo(FILE *f, unsigned char codigo[])
 {
     funcp func;
@@ -47,7 +55,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 if (idx0 == 1)
                 {
 
-                    append_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_parameter(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < curr_length + 4; i++)
                         codigo[i] = tmp_arr[i];
@@ -55,7 +63,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso seja segundo parametro (familia rsi) */
                 else
                 {
-                    append_param_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_parameter(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < curr_length + 4; i++)
                         codigo[i] = tmp_arr[i];
@@ -67,7 +75,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a primeira variavel local */
                 if (idx0 == 1)
                 {
-                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_var(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -75,7 +83,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a segunda variavel local */
                 else if (idx0 == 2)
                 {
-                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_var(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -83,7 +91,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a terceira variavel local */
                 else if (idx0 == 3)
                 {
-                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_var(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -91,7 +99,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 /* caso retorne a quarta variavel local */
                 else
                 {
-                    append_var_ret_machineCode(tmp_arr, idx0, line, curr_length);
+                    return_var(tmp_arr, idx0, line, curr_length);
 
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
@@ -110,6 +118,12 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 
             if (fscanf(f, "%d %c= %c%d", &idx0, &op, &var1, &idx1) != 4)
                 error("comando invalido", line);
+
+            /* verificar numero da variavel */
+            /* verificar operação */
+            /* -> uma funcao para cada operacao */
+            /* verificar variavel/parametro depois do sinal de operacao */
+            /* verificar numero da variavel/parametro depois do sinal de operacao */
 
             printf("%d %c%d %c= %c%d\n", line, var0, idx0, op, var1, idx1); /* machine code de manipulacao de variavel local em assembly */
             break;
@@ -167,7 +181,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 }
 
 /* atualizar "cabecalho" do array de acordo com a quantidade de variáveis locais */
-void append_var_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
+void return_var(unsigned char arr[], int idx0, int line, int arr_size)
 {
     /* talvez precise usar esse tmp_arr depois que implementar função para contar quantidade de machine codes que estão sendo usados */
     // unsigned char tmp_arr[ARR_SIZE];
@@ -175,75 +189,49 @@ void append_var_ret_machineCode(unsigned char arr[], int idx0, int line, int arr
     switch (idx0)
     {
     case 1 /* rdx */:
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
-        arr[arr_size] = 0xba;
-        arr[arr_size + 1] = 0xc8; // daqui
-        arr[arr_size + 2] = 0x00;
-        arr[arr_size + 3] = 0x00;
-        arr[arr_size + 4] = 0x00; // até aqui é codigo de maquina no mov 200, edx (remover depois)
-        arr[arr_size + 5] = 0x89;
-        arr[arr_size + 6] = 0xd0;
-        arr[arr_size + 7] = 0xc9;
-        arr[arr_size + 8] = 0xc3;
+        /* codigos de maquina de mover para eax e leave/ret */
+        arr[arr_size] = 0x89;
+        arr[arr_size + 1] = 0xd0;
+        arr[arr_size + 2] = 0xc9;
+        arr[arr_size + 3] = 0xc3;
 
         break;
 
     case 2 /* rdx e rcx */:
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
-        arr[arr_size] = 0xb9;
-        arr[arr_size + 1] = 0xc8; // daqui
-        arr[arr_size + 2] = 0x00;
-        arr[arr_size + 3] = 0x00;
-        arr[arr_size + 4] = 0x00; // até aqui (remover depois)
-        arr[arr_size + 5] = 0x89;
-        arr[arr_size + 6] = 0xc8;
-        arr[arr_size + 7] = 0xc9;
-        arr[arr_size + 8] = 0xc3;
+        /* codigos de maquina de mover para eax e leave/ret */
+        arr[arr_size] = 0x89;
+        arr[arr_size + 1] = 0xc8;
+        arr[arr_size + 2] = 0xc9;
+        arr[arr_size + 3] = 0xc3;
 
         break;
 
     case 3 /* rdx, rcx e r8 */:
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
-        arr[arr_size] = 0x41;
-        arr[arr_size + 1] = 0xb8;
-        arr[arr_size + 2] = 0xc8; // daqui
-        arr[arr_size + 3] = 0x00;
-        arr[arr_size + 4] = 0x00;
-        arr[arr_size + 5] = 0x00; // ate aqui (remover depois)
-        arr[arr_size + 6] = 0x44;
-        arr[arr_size + 7] = 0x89;
-        arr[arr_size + 8] = 0xc0;
-        arr[arr_size + 9] = 0xc9;
-        arr[arr_size + 10] = 0xc3;
+        /* codigos de maquina de mover para eax e leave/ret */
+        arr[arr_size] = 0x44;
+        arr[arr_size + 1] = 0x89;
+        arr[arr_size + 2] = 0xc0;
+        arr[arr_size + 3] = 0xc9;
+        arr[arr_size + 4] = 0xc3;
 
         break;
 
     case 4 /* rdx, rcx, r8 e r9 */:
-
-        /* preenchendo array com mov 200 para variavel local e retornar esse 200 para TESTES */
-        arr[arr_size] = 0x41;
-        arr[arr_size + 1] = 0xb9;
-        arr[arr_size + 2] = 0xc8; // daqui
-        arr[arr_size + 3] = 0x00;
-        arr[arr_size + 4] = 0x00;
-        arr[arr_size + 5] = 0x00; // ate aqui (remover depois)
-        arr[arr_size + 6] = 0x44;
-        arr[arr_size + 7] = 0x89;
-        arr[arr_size + 8] = 0xc8;
-        arr[arr_size + 9] = 0xc9;
-        arr[arr_size + 10] = 0xc3;
+        /* codigos de maquina de mover para eax e leave/ret */
+        arr[arr_size] = 0x44;
+        arr[arr_size + 1] = 0x89;
+        arr[arr_size + 2] = 0xc8;
+        arr[arr_size + 3] = 0xc9;
+        arr[arr_size + 4] = 0xc3;
 
         break;
 
     default:
-        error("número de variável local incorreto", line);
+        error("número de variável local inválido", line);
     }
 }
 
-void append_param_ret_machineCode(unsigned char arr[], int idx0, int line, int arr_size)
+void return_parameter(unsigned char arr[], int idx0, int line, int arr_size)
 {
     /* caso seja primeiro parametro (familia rdi) */
     if (idx0 == 1)
@@ -265,8 +253,51 @@ void append_param_ret_machineCode(unsigned char arr[], int idx0, int line, int a
         arr[arr_size + 3] = 0xc3; /* ret */
     }
     else
-        error("número de parâmetro incorreto", line);
+        error("número de parâmetro inválido", line);
 }
+
+void var_add_operation(char var0, int idx0, char var1, int idx1, char op, int line)
+{
+    if (var1 == '$') /* constante */
+    {
+    }
+
+    else if (var1 == 'v') /* variavel */
+    {
+        switch (idx1)
+        {
+        case 1:
+            break;
+        case 2:
+            break;
+        case 3:
+            break;
+        case 4:
+            break;
+        default:
+            error("número de variável inválido", line);
+            break;
+        }
+    }
+
+    else if (var1 == 'p') /* parametro */
+    {
+        if (idx1 == 1)
+        {
+        }
+
+        else if (idx1 == 2)
+        {
+        }
+        else
+            error("número de parâmetro inválido", line);
+    }
+
+    else
+        error("variável inválida", line);
+}
+void var_sub_operation(char var0, int idx0, char var1, int idx1, char op, int line);
+void var_mult_operation(char var0, int idx0, char var1, int idx1, char op, int line);
 
 static void error(const char *msg, int line)
 {
