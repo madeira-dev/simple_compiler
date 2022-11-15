@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include "geracodigo.h"
 
 #define ARR_SIZE 1024  /* tamanho máximo do vetor */
@@ -19,6 +20,8 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
 void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
 void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
+void decimal_to_hex(int decimal_number, char *tmp);
+int string2num(char *s, int base);
 
 // parameter manipulation
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op, int line);
@@ -84,9 +87,9 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                     for (int i = 0; i < ARR_SIZE; i++)
                         codigo[i] = tmp_arr[i];
 
-                    printf("tmp_arr final retornando variavel 1\n");
-                    for (int i = 0; i < 50; i++)
-                        printf("%d: %x\n", i, tmp_arr[i]);
+                    // printf("tmp_arr final retornando variavel 1\n");
+                    // for (int i = 0; i < 50; i++)
+                    //     printf("%d: %x\n", i, tmp_arr[i]);
                 }
                 /* caso retorne a segunda variavel local */
                 else if (idx0 == 2)
@@ -130,18 +133,25 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
-                printf("tmp_arr antes de call da funcao\n");
-                for (int i = 0; i < 50; i++)
-                    printf("%d: %x\n", i, tmp_arr[i]);
+                // printf("tmp_arr antes de call da funcao\n");
+                // for (int i = 0; i < 50; i++)
+                //     printf("%d: %x\n", i, tmp_arr[i]);
 
                 var_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, line, &curr_length);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
 
-                printf("tmp_arr depois de call da funcao\n");
-                for (int i = 0; i < 50; i++)
-                    printf("%d: %x\n", i, tmp_arr[i]);
+                printf("depois call attr\n");
+                for (int i = 0; i < curr_length; i++)
+                    printf("%x ", codigo[i]);
+                printf("\n");
+
+                // printf("tmp_arr depois de call da funcao\n");
+                // for (int i = 0; i < 50; i++)
+                //     printf("%d: %x\n", i, tmp_arr[i]);
                 break;
             case '+':
-                var_add_operation(tmp_arr, var0, idx0, var1, idx1, op, line, &curr_length);
+                // var_add_operation(tmp_arr, var0, idx0, var1, idx1, op, line, &curr_length);
                 break;
             case '-':
                 break;
@@ -151,10 +161,6 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 error("operação inválida", line);
                 break;
             }
-
-            /* verificar numero da variavel */
-            /* verificar operação */
-            /* -> uma funcao para cada operacao */
 
             break;
         }
@@ -174,7 +180,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 par_add_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op, line);
             }
 
-            printf("%d %c%d %c= %c%d\n", line, var0, idx0, op, var1, idx1); /* machine code de manipulacao de parametros em assembly */
+            // printf("%d %c%d %c= %c%d\n", line, var0, idx0, op, var1, idx1); /* machine code de manipulacao de parametros em assembly */
             break;
         }
 
@@ -215,11 +221,8 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     return func;
 }
 
-/* atualizar "cabecalho" do array de acordo com a quantidade de variáveis locais */
 void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
 {
-    /* talvez precise usar esse tmp_arr depois que implementar função para contar quantidade de machine codes que estão sendo usados */
-    // unsigned char tmp_arr[ARR_SIZE];
 
     switch (idx0)
     {
@@ -229,7 +232,7 @@ void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
         arr[*curr_length + 1] = 0xd0;
         arr[*curr_length + 2] = 0xc9;
         arr[*curr_length + 3] = 0xc3;
-
+        *curr_length += 4;
         break;
 
     case 2 /* rdx e rcx */:
@@ -238,7 +241,7 @@ void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
         arr[*curr_length + 1] = 0xc8;
         arr[*curr_length + 2] = 0xc9;
         arr[*curr_length + 3] = 0xc3;
-
+        *curr_length += 4;
         break;
 
     case 3 /* rdx, rcx e r8 */:
@@ -248,7 +251,7 @@ void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
         arr[*curr_length + 2] = 0xc0;
         arr[*curr_length + 3] = 0xc9;
         arr[*curr_length + 4] = 0xc3;
-
+        *curr_length += 4;
         break;
 
     case 4 /* rdx, rcx, r8 e r9 */:
@@ -258,7 +261,7 @@ void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
         arr[*curr_length + 2] = 0xc8;
         arr[*curr_length + 3] = 0xc9;
         arr[*curr_length + 4] = 0xc3;
-
+        *curr_length += 4;
         break;
 
     default:
@@ -276,7 +279,6 @@ void return_parameter(unsigned char arr[], int idx0, int line, int *curr_length)
         arr[*curr_length + 1] = 0xf8; /* segundo byte do mov edi, eax */
         arr[*curr_length + 2] = 0xc9; /* leave */
         arr[*curr_length + 3] = 0xc3; /* ret */
-
         *curr_length += 4;
     }
 
@@ -294,26 +296,61 @@ void return_parameter(unsigned char arr[], int idx0, int line, int *curr_length)
         error("número de parâmetro inválido", line);
 }
 
-void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length)
+void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *curr_length)
 {
     // verificando segunda variavel/constante/parametro
     if (var1 == '$') /* constante */
     {
-        /* verificar valor da constante? */
-        /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com a constante */
+        // printf("BANANA\n");
+        char tmp_arr[20];
+        sprintf(tmp_arr, "%x", idx1);
+        int tmp_int = string2num(tmp_arr, 16);
+        printf("test antes: %x\n", tmp_int);
+
         switch (idx0) /* verificando o valor da primeira variavel */
         {
         case 1:
-            unsigned char var1_manip_add_const[50];
+            arr[*curr_length] = 0xba;
+
+            arr[*curr_length + 1] = (tmp_int & 0x000000ff);
+            printf("%x\n", arr[*curr_length + 1]);
+
+            arr[*curr_length + 2] = (tmp_int & 0x0000ff00);
+            printf("%x\n", arr[*curr_length + 2]);
+
+            arr[*curr_length + 3] = (tmp_int & 0x00ff0000);
+            printf("%x\n", arr[*curr_length + 3]);
+
+            arr[*curr_length + 4] = (tmp_int & 0xff000000);
+            printf("%x\n", arr[*curr_length + 4]);
+
+            *curr_length += 5;
             break;
         case 2:
-            unsigned char var2_manip_add_const[50];
+            arr[*curr_length] = 0xb9;
+            arr[*curr_length + 1] = (tmp_int & 0x000000ff);
+            arr[*curr_length + 2] = (tmp_int & 0x0000ff00);
+            arr[*curr_length + 3] = (tmp_int & 0x00ff0000);
+            arr[*curr_length + 4] = (tmp_int & 0xff000000);
+            *curr_length += 5;
             break;
         case 3:
-            unsigned char var3_manip_add_const[50];
+            arr[*curr_length] = 0x41;
+            arr[*curr_length + 1] = 0xb8;
+            arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+            arr[*curr_length + 3] = (tmp_int & 0x0000ff00);
+            arr[*curr_length + 4] = (tmp_int & 0x00ff0000);
+            arr[*curr_length + 5] = (tmp_int & 0xff000000);
+            *curr_length += 6;
             break;
         case 4:
-            unsigned char var4_manip_add_const[50];
+            arr[*curr_length] = 0x41;
+            arr[*curr_length + 1] = 0xb9;
+            arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+            arr[*curr_length + 3] = (tmp_int & 0x0000ff00);
+            arr[*curr_length + 4] = (tmp_int & 0x00ff0000);
+            arr[*curr_length + 5] = (tmp_int & 0xff000000);
+            *curr_length += 6;
             break;
         default:
             error("número de variável inválido", line);
@@ -354,13 +391,13 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var1_manip_attr_var2[] = {};
                 break;
             case 2:
-                unsigned char var2_manip_attr_var2[50];
+                unsigned char var2_manip_attr_var2[] = {};
                 break;
             case 3:
-                unsigned char var3_manip_attr_var2[50];
+                unsigned char var3_manip_attr_var2[] = {};
                 break;
             case 4:
-                unsigned char var4_manip_attr_var2[50];
+                unsigned char var4_manip_attr_var2[] = {};
                 break;
             default:
                 error("número de variável inválido", line);
@@ -376,13 +413,13 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var1_manip_attr_var3[] = {};
                 break;
             case 2:
-                unsigned char var2_manip_attr_var3[50];
+                unsigned char var2_manip_attr_var3[] = {};
                 break;
             case 3:
-                unsigned char var3_manip_attr_var3[50];
+                unsigned char var3_manip_attr_var3[] = {};
                 break;
             case 4:
-                unsigned char var4_manip_attr_var3[50];
+                unsigned char var4_manip_attr_var3[] = {};
                 break;
             default:
                 error("número de variável inválido", line);
@@ -420,21 +457,21 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
 
     else if (var1 == 'p') /* parametro */
     {
-        printf("entrou em parametro\n");
+        // printf("entrou em parametro\n");
         if (idx1 == 1) /* verificando id do parametro */
         {
             switch (idx0) /* verificando o id da primeira variavel*/
             {
             case 1:
-                printf("entrou case 1 do parametro\n");
-                printf("array_length antes: %d\n", *array_length);
+                // printf("entrou case 1 do parametro\n");
+                // printf("array_length antes: %d\n", *array_length);
 
-                arr[*array_length] = 0x89;
-                arr[*array_length + 1] = 0xfa;
+                arr[*curr_length] = 0x89;
+                arr[*curr_length + 1] = 0xfa;
 
-                *array_length += 2;
+                *curr_length += 2;
 
-                printf("array_length depois: %d\n", *array_length);
+                // printf("array_length depois: %d\n", *array_length);
                 break;
             case 2:
                 unsigned char var2_manip_attr_param1[] = {};
@@ -664,9 +701,41 @@ static void error(const char *msg, int line)
     exit(EXIT_FAILURE);
 }
 
+int string2num(char *s, int base)
+{
+    int a = 0;
+    for (; *s; s++)
+    {
+        if isdigit (*s)
+            a = a * base + (*s - '0');
+        else if isupper (*s)
+            a = a * base + (*s - 'A' + 10);
+        else
+            a = a * base + (*s - 'a' + 10);
+    }
+    return a;
+}
+
+void decimal_to_hex(int decimal_number, char *tmp)
+{
+    int count_chars = 0, i = 0;
+    char formatted_str[50];
+
+    sprintf(formatted_str, "0x%x", decimal_number);
+
+    while (formatted_str[i] != '\0')
+    {
+        count_chars++;
+        i++;
+    }
+
+    for (i = 0; i < count_chars; i++)
+        tmp[i] = formatted_str[i];
+}
+
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op, int line)
 {
-    printf("AQUI\n");
+    // printf("AQUI\n");
     switch (idx0)
     {
     case 1:
@@ -679,7 +748,7 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 arr[(*arr_size) + 1] = 0xff;
 
                 *arr_size += 2;
-                printf("%d \n", *arr_size);
+                // printf("%d \n", *arr_size);
             }
             else if (idx1 == 2) // p1 += p2
             {
