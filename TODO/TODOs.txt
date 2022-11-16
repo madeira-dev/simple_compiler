@@ -1,39 +1,28 @@
 dúvidas:
 
 	-> qual seria o tamanho apropriado do vetor do codigo?? não pode usar malloc, realloc....?????
+		-- não existe exatamente um tamanho adequado, o adequado seria um tamanho que caiba todos os opcodes
+			das instruções, então 512 deve ser o suficiente. evitar usar malloc entre funções por desviar o
+			endereço de memória apontada
 
-	-> só existe uma função por arquivo SB? 
+	-> só existe uma função por arquivo SB? *sim*
 		
-	-> entender cada comando listado na sintaxe.
-
-	/*
-	-> erro na traducao da terceira funcao para assembly; multiplicar variavel local por parametro
-		--> uma solucao foi alterar de *leaq* pra *leal* mas pode isso? nas instrucoes passadas pra turma só tem *leaq*
-			tem como corrigir sem alterar pra *leal*??
-			
-		--> pesquisando sobre o problema, encontrei que imull só aceita o op2 como um registrador e não uma memória,
-			como aparentemente é o caso de (%rcx), imaginei q seria o conteúdo da memória, mas ok. e então a solução
-			seria usar um registrador ao invés de memória, mas para ser variável local tem que ser memória por causa
-			do leaq já que Load Effective Address.
-		
-		--> como alterei pra *leal* ao invés de *leaq* usei um registrador de 32 bits, tem problema??
-	*/
+	-> entender cada comando listado na sintaxe. *entendi*
 
 	-> dúvidas cases do switch:
 		--> O SWITCH DESTE ESBOÇO ESTÁ COBRINDO TODOS OS FORMATOS POSSIVEIS?? SE NAO, FALTA QUAL??
 		
-		--> case de retorno: colocar o opcode apenas de ret no array ou opcode de leave E DE ret???
+		--> case de retorno: colocar o opcode apenas de ret no array ou opcode de leave E DE ret??? *leave E ret*
 		
-		--> case de variavel local: no fscanf, a string formatada sempre considera um sinal de '=', alterar isso para
-			casos como '+=' ou não??
-			- if/else pra cada sinal de operação??
+		--> case de variavel local: if/else pra cada sinal de operação??
 		
 		--> case de parametros: mesmas dúvidas que para variáveis locais
 		
 		--> case de desvio condicional: a formatação do desvio condicional será sempre a mesma?? até nos testes realizados
 			por você, professor???
 		
-		--> case de desvio incondicional: acho que não tem muito mistério, nenhuma pergunta.
+		--> case de desvio incondicional: a conta que precisa ser feita é: endereço da variável - offset na instrucao de jmp(go)
+			(isso tb vale pra desvio condicional)
 
 		--> acho que o que precisa ser feito é: pra toda instrução lida, gerar o correspondente em assembly, de assembly
 			para código de máquina e dar append desse código de máquina no vetor a ser retornado
@@ -60,10 +49,13 @@ possível algoritmo:
 		no vetor mesmo??;
 	
 	- para parametros: verificar numero do parametro, caso seja o primeiro usar opcode de manipulacao da familia %rdi
-		se nao for o primeiro, usar opcode de manipulacao da familia %rsi
+		se nao for o primeiro, usar opcode de manipulacao da familia %rsi *feito*
 	
-	- para retorno: verificar qual variavel está sendo retornada, passar ela para o %eax e entao, leave/ret
+	- para retorno: verificar qual variavel está sendo retornada, passar ela para o %eax e entao, leave/ret *feito*
 
 	- para desvio condicional: <COMPLETE>
 
 	- para desvio incondicional: <COMPLETE>
+
+IMPORTANTE:
+INICIALIZAR VETOR COM RA PRA 4 VARIAVEIS MESMO QUE NAO USE AS 4 *feito*
