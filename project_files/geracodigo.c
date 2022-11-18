@@ -12,18 +12,18 @@ typedef int (*funcp)();
 
 /* functions prototypes */
 // return
-void return_var(unsigned char arr[], int var_id, int line, int *curr_length);
-void return_parameter(unsigned char arr[], int idx0, int line, int *curr_length);
+void return_var(unsigned char arr[], int var_id, int *curr_length);
+void return_parameter(unsigned char arr[], int idx0, int *curr_length);
 
 // var manipulation
-void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
-void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
-void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
-void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
+void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
 
 // parameter manipulation
-void par_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *array_length);
-void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op, int line);
+void par_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
 
 // aux
 static void error(const char *msg, int line);
@@ -54,57 +54,20 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 
             if (fscanf(f, "et %c%d", &var0, &idx0) != 2)
                 error("comando invalido", line);
-
             /* caso retornar parametro */
             if (var0 == 'p')
             {
-                /* caso seja primeiro parametro (familia rdi) */
-                if (idx0 == 1)
-                {
-                    return_parameter(tmp_arr, idx0, line, &curr_length);
-                    for (int i = 0; i < curr_length; i++)
-                        codigo[i] = tmp_arr[i];
-                }
-                /* caso seja segundo parametro (familia rsi) */
-                else
-                {
-                    return_parameter(tmp_arr, idx0, line, &curr_length);
-                    for (int i = 0; i < curr_length + 4; i++)
-                        codigo[i] = tmp_arr[i];
-                }
+                return_parameter(tmp_arr, idx0, &curr_length);
+                for (int i = 0; i < curr_length; i++)
+                    codigo[i] = tmp_arr[i];
             }
             /* caso retornar variavel */
             else
             {
-                /* caso retorne a primeira variavel local */
-                if (idx0 == 1)
-                {
-                    return_var(tmp_arr, idx0, line, &curr_length);
-                    for (int i = 0; i < ARR_SIZE; i++)
-                        codigo[i] = tmp_arr[i];
-                }
-                /* caso retorne a segunda variavel local */
-                else if (idx0 == 2)
-                {
-                    return_var(tmp_arr, idx0, line, &curr_length);
-                    for (int i = 0; i < ARR_SIZE; i++)
-                        codigo[i] = tmp_arr[i];
-                }
-                /* caso retorne a terceira variavel local */
-                else if (idx0 == 3)
-                {
-                    return_var(tmp_arr, idx0, line, &curr_length);
-                    for (int i = 0; i < ARR_SIZE; i++)
-                        codigo[i] = tmp_arr[i];
-                }
-                /* caso retorne a quarta variavel local */
-                else
-                {
-                    return_var(tmp_arr, idx0, line, &curr_length);
-
-                    for (int i = 0; i < ARR_SIZE; i++)
-                        codigo[i] = tmp_arr[i];
-                }
+                /* caso retorne variavel local */
+                return_var(tmp_arr, idx0, &curr_length);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
             }
             break;
         }
@@ -121,12 +84,12 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
-                var_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, line, &curr_length);
+                var_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
                 for (int i = 0; i < ARR_SIZE; i++)
                     codigo[i] = tmp_arr[i];
                 break;
             case '+':
-                // var_add_operation(tmp_arr, var0, idx0, var1, idx1, op, line, &curr_length);
+                var_add_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
                 break;
             case '-':
                 break;
@@ -151,8 +114,10 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
+                par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
                 break;
             case '+':
+                par_add_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 break;
             case '-':
                 break;
@@ -202,82 +167,49 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     return func;
 }
 
-void return_var(unsigned char arr[], int idx0, int line, int *curr_length)
+void return_var(unsigned char arr[], int idx0, int *curr_length)
 {
-
-    switch (idx0)
+    if (idx0 == 1 || idx0 == 2)
     {
-    case 1 /* rdx */:
-        /* codigos de maquina de mover para eax e leave/ret */
         arr[*curr_length] = 0x89;
-        arr[*curr_length + 1] = 0xd0;
+        if (idx0 == 1)
+            arr[*curr_length + 1] = 0xd0;
+        else
+            arr[*curr_length + 1] = 0xc8;
         arr[*curr_length + 2] = 0xc9;
         arr[*curr_length + 3] = 0xc3;
-        *curr_length += 4;
-        break;
-
-    case 2 /* rdx e rcx */:
-        /* codigos de maquina de mover para eax e leave/ret */
-        arr[*curr_length] = 0x89;
-        arr[*curr_length + 1] = 0xc8;
-        arr[*curr_length + 2] = 0xc9;
-        arr[*curr_length + 3] = 0xc3;
-        *curr_length += 4;
-        break;
-
-    case 3 /* rdx, rcx e r8 */:
-        /* codigos de maquina de mover para eax e leave/ret */
-        arr[*curr_length] = 0x44;
-        arr[*curr_length + 1] = 0x89;
-        arr[*curr_length + 2] = 0xc0;
-        arr[*curr_length + 3] = 0xc9;
-        arr[*curr_length + 4] = 0xc3;
-        *curr_length += 4;
-        break;
-
-    case 4 /* rdx, rcx, r8 e r9 */:
-        /* codigos de maquina de mover para eax e leave/ret */
-        arr[*curr_length] = 0x44;
-        arr[*curr_length + 1] = 0x89;
-        arr[*curr_length + 2] = 0xc8;
-        arr[*curr_length + 3] = 0xc9;
-        arr[*curr_length + 4] = 0xc3;
-        *curr_length += 4;
-        break;
-
-    default:
-        error("número de variável local inválido", line);
-    }
-}
-
-void return_parameter(unsigned char arr[], int idx0, int line, int *curr_length)
-{
-    /* caso seja primeiro parametro (familia rdi) */
-    if (idx0 == 1)
-    {
-        /* (mov edi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-        arr[*curr_length] = 0x89;     /* primeiro byte do mov  edi, eax */
-        arr[*curr_length + 1] = 0xf8; /* segundo byte do mov edi, eax */
-        arr[*curr_length + 2] = 0xc9; /* leave */
-        arr[*curr_length + 3] = 0xc3; /* ret */
-        *curr_length += 4;
-    }
-
-    /* caso seja segundo parametro (familia rsi) */
-    else if (idx0 == 2)
-    {
-        /* (mov esi, eax) na posicao len-3 e len-2; leave na posicao len-1; ret na posicao len */
-        arr[*curr_length] = 0x89;     /* primeiro byte do mov esi, eax */
-        arr[*curr_length + 1] = 0xf0; /* segundo byte do mov esi, eax */
-        arr[*curr_length + 2] = 0xc9; /* leave */
-        arr[*curr_length + 3] = 0xc3; /* ret */
         *curr_length += 4;
     }
     else
-        error("número de parâmetro inválido", line);
+    {
+        arr[*curr_length] = 0x44;
+        arr[*curr_length + 1] = 0x89;
+        if (idx0 == 3)
+            arr[*curr_length + 2] = 0xc0;
+        else
+            arr[*curr_length + 2] = 0xc8;
+        arr[*curr_length + 3] = 0xc9;
+        arr[*curr_length + 4] = 0xc3;
+        *curr_length += 5;
+    }
 }
 
-void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *curr_length)
+void return_parameter(unsigned char arr[], int idx0, int *curr_length)
+{
+    arr[*curr_length] = 0x89;
+    /* caso seja primeiro parametro (familia rdi) */
+    if (idx0 == 1)
+        arr[*curr_length + 1] = 0xf8; /* segundo byte do mov edi, eax */
+
+    /* caso seja segundo parametro (familia rsi) */
+    else
+        arr[*curr_length + 1] = 0xf0; /* segundo byte do mov esi, eax */
+    arr[*curr_length + 2] = 0xc9;     /* leave */
+    arr[*curr_length + 3] = 0xc3;     /* ret */
+    *curr_length += 4;
+}
+
+void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
     // verificando segunda variavel/constante/parametro
     if (var1 == '$') /* constante */
@@ -303,7 +235,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
             arr[*curr_length + 1] = 0xb9;
             break;
         default:
-            error("número de variável inválido", line);
             break;
         }
 
@@ -346,7 +277,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_var1[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
             break;
@@ -367,7 +297,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_var2[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
 
@@ -389,7 +318,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_var3[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
 
@@ -411,13 +339,11 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_var4[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
             break;
 
         default:
-            error("número de variável inválido", line);
             break;
         }
     }
@@ -443,7 +369,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_param1[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
         }
@@ -465,20 +390,13 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
                 unsigned char var4_manip_attr_param2[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
         }
-
-        else
-            error("número de parâmetro inválido", line);
     }
-
-    else
-        error("variável inválida", line);
 }
 
-void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int line, int *curr_length)
+void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
     /* verificando o que esta sendo somado à variável */
     if (var1 == '$') /* constante */
@@ -499,7 +417,6 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
             unsigned char var4_manip_add_const[50];
             break;
         default:
-            error("número de variável inválido", line);
             break;
         }
     }
@@ -525,7 +442,6 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_var1[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
             break;
@@ -546,7 +462,6 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_var2[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
 
@@ -568,7 +483,6 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_var3[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
 
@@ -590,13 +504,11 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_var4[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
             break;
 
         default:
-            error("número de variável inválido", line);
             break;
         }
     }
@@ -620,7 +532,6 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_param1[] = {};
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
         }
@@ -642,20 +553,13 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
                 unsigned char var4_manip_add_param2[50];
                 break;
             default:
-                error("número de variável inválido", line);
                 break;
             }
         }
-
-        else
-            error("número de parâmetro inválido", line);
     }
-
-    else
-        error("variável inválida", line);
 }
 
-void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op, int line)
+void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
     switch (idx0)
     {
@@ -663,65 +567,39 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
     {
         if (var1 == 'p')
         {
+            arr[*arr_size] = 0x01;
             if (idx1 == 1) // p1 += p1
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xff;
-                *arr_size += 2;
-            }
-            else if (idx1 == 2) // p1 += p2
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xf7;
-                (*arr_size)++;
-            }
-            else
-                error("numero de parametro invalido\n", line);
+                arr[*arr_size + 1] = 0xff;
+            else // p1 += p2
+                arr[*arr_size + 1] = 0xf7;
+            *arr_size += 2;
         }
 
         else if (var1 == 'v')
         {
-            switch (idx1)
-            {
-            case 1: // p1 += v1
+            if (idx1 == 1 || idx1 == 2)
             {
                 arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xd7;
-                break;
+                if (idx1 == 1)
+                    arr[*arr_size + 1] = 0xd7;
+                else
+                    arr[*arr_size + 1] = 0xcf;
+                *arr_size += 2;
             }
-            case 2: // p1 += v2
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xcf;
-                break;
-            }
-            case 3: // p1 += v3
+            else
             {
                 arr[*arr_size] = 0x44;
-                arr[(*arr_size) + 1] = 0x01;
-                arr[(*arr_size) + 2] = 0xc7;
-                break;
-            }
-            case 4: // p1 += v4
-            {
-                arr[*arr_size] = 0x44;
-                arr[(*arr_size) + 1] = 0x01;
-                arr[(*arr_size) + 2] = 0xcf;
-
-                break;
-            }
-            default:
-            {
-                error("numero de variavel invalido\n", line);
-                break;
-            }
+                arr[*arr_size + 1] = 0x01;
+                if (idx1 == 3)
+                    arr[*arr_size + 2] = 0xc7;
+                else
+                    arr[*arr_size + 2] = 0xcf;
+                *arr_size += 3;
             }
         }
         else if (var1 == '$')
         {
         }
-        else
-            error("numero de variavel invalido\n", line);
         break;
     }
 
@@ -729,69 +607,41 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
     {
         if (var1 == 'p')
         {
+            arr[*arr_size] = 0x01;
             if (idx1 == 1) // p2 += p1
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xfe;
-            }
-            else if (idx1 == 2) // p2 += p2
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xf6;
-            }
-            else
-            {
-                error("numero de parametro invalido\n", line);
-            }
+                arr[*arr_size + 1] = 0xfe;
+            else // p2 += p2
+                arr[*arr_size + 1] = 0xf6;
+            *arr_size += 2;
         }
         else if (var1 == 'v')
         {
-            switch (idx1)
-            {
-            case 1: // p2+= v1
+            if (idx1 == 1 || idx1 == 2)
             {
                 arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xd6;
-                break;
+                if (idx1 == 1)
+                    arr[*arr_size + 1] = 0xd6;
+                else
+                    arr[*arr_size + 1] = 0xce;
+                *arr_size += 2;
             }
-            case 2: // p2 += v2
-            {
-                arr[*arr_size] = 0x01;
-                arr[(*arr_size) + 1] = 0xce;
-
-                break;
-            }
-            case 3: // p2 += v3
+            else
             {
                 arr[*arr_size] = 0x44;
-                arr[(*arr_size) + 1] = 0x01;
-                arr[(*arr_size) + 2] = 0xc6;
-                break;
-            }
-            case 4: // p2 += v4
-            {
-                arr[*arr_size] = 0x44;
-                arr[(*arr_size) + 1] = 0x01;
-                arr[(*arr_size) + 2] = 0xc7;
-                break;
-            }
-            default:
-            {
-                error("numero de variavel invalido\n", line);
-                break;
-            }
-            break;
+                arr[*arr_size + 1] = 0x01;
+                if (idx1 == 3)
+                    arr[*arr_size + 2] = 0xc6;
+                else
+                    arr[*arr_size + 2] = 0xc7;
+                *arr_size += 3;
             }
         }
         else if (var1 == '$')
         {
         }
-        else
-            error("numero de parametro invalido\n", line);
         break;
     }
     default:
-        error("numero de parametro invalido\n", line);
         break;
     }
     return;
