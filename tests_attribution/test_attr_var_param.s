@@ -9,7 +9,7 @@ ret_test6:
     leaq -16(%rbp), %r8
     leaq -8(%rbp), %r9
 
-    movl %edi, %edx
+    movl %esi, %r9d
 
     leave
     ret

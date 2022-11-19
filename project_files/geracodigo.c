@@ -16,7 +16,7 @@ void return_var(unsigned char arr[], int var_id, int *curr_length);
 void return_parameter(unsigned char arr[], int idx0, int *curr_length);
 
 // var manipulation
-void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length);
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
 void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
 void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
@@ -114,7 +114,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
-                par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                // par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
                 break;
             case '+':
                 par_add_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
@@ -167,6 +167,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     return func;
 }
 
+// return functions
 void return_var(unsigned char arr[], int idx0, int *curr_length)
 {
     if (idx0 == 1 || idx0 == 2)
@@ -209,6 +210,7 @@ void return_parameter(unsigned char arr[], int idx0, int *curr_length)
     *curr_length += 4;
 }
 
+// variable manipulation functions
 void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
     // verificando segunda variavel/constante/parametro
@@ -261,88 +263,79 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
         switch (idx1) /* verificando id da segunda variavel */
         {
         case 1:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com primeira variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 3 || idx0 == 4)
             {
-            case 1:
-                unsigned char var1_manip_attr_var1[] = {};
-                break;
-            case 2:
-                unsigned char var2_manip_attr_var1[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_attr_var1[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_attr_var1[] = {};
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 3)
+                    arr[*curr_length + 2] = 0xd0;
+                else
+                    arr[*curr_length + 2] = 0xd1;
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x89;
+                arr[*curr_length + 1] = 0xd1;
+                *curr_length += 2;
             }
             break;
         case 2:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com segunda variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 3 || idx0 == 4)
             {
-            case 1:
-                unsigned char var1_manip_attr_var2[] = {};
-                break;
-            case 2:
-                unsigned char var2_manip_attr_var2[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_attr_var2[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_attr_var2[] = {};
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 3)
+                    arr[*curr_length + 2] = 0xc8;
+                else
+                    arr[*curr_length + 2] = 0xc9;
+                *curr_length += 3;
             }
-
+            else
+            {
+                arr[*curr_length] = 0x89;
+                arr[*curr_length + 1] = 0xca;
+                *curr_length += 2;
+            }
             break;
         case 3:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com terceira variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_attr_var3[] = {};
-                break;
-            case 2:
-                unsigned char var2_manip_attr_var3[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_attr_var3[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_attr_var3[] = {};
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x44;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 1)
+                    arr[*curr_length + 2] = 0xc2;
+                else
+                    arr[*curr_length + 2] = 0xc1;
+                *curr_length += 3;
             }
-
+            else
+            {
+                arr[*curr_length] = 0x45;
+                arr[*curr_length + 1] = 0x89;
+                arr[*curr_length + 2] = 0xc1;
+                *curr_length += 3;
+            }
             break;
         case 4:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com quarta variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_attr_var4[] = {};
-                break;
-            case 2:
-                unsigned char var2_manip_attr_var4[50];
-                break;
-            case 3:
-                unsigned char var3_manip_attr_var4[50];
-                break;
-            case 4:
-                unsigned char var4_manip_attr_var4[50];
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x44;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 1)
+                    arr[*curr_length + 2] = 0xca;
+                else
+                    arr[*curr_length + 2] = 0xc9;
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x45;
+                arr[*curr_length + 1] = 0x89;
+                arr[*curr_length + 2] = 0xc8;
+                *curr_length += 3;
             }
             break;
-
         default:
             break;
         }
@@ -352,45 +345,48 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
     {
         if (idx1 == 1) /* verificando id do parametro */
         {
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
                 arr[*curr_length] = 0x89;
-                arr[*curr_length + 1] = 0xfa;
+                if (idx0 == 1)
+                    arr[*curr_length + 1] = 0xfa;
+                else
+                    arr[*curr_length + 1] = 0xf9;
                 *curr_length += 2;
-                break;
-            case 2:
-                unsigned char var2_manip_attr_param1[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_attr_param1[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_attr_param1[] = {};
-                break;
-            default:
-                break;
+            }
+
+            else
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 3)
+                    arr[*curr_length + 2] = 0xf8;
+                else
+                    arr[*curr_length + 2] = 0xf9;
+                *curr_length += 3;
             }
         }
 
         else if (idx1 == 2)
         {
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_attr_param2[] = {};
-                break;
-            case 2:
-                unsigned char var2_manip_attr_param2[50];
-                break;
-            case 3:
-                unsigned char var3_manip_attr_param2[50];
-                break;
-            case 4:
-                unsigned char var4_manip_attr_param2[50];
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x89;
+                if (idx0 == 1)
+                    arr[*curr_length + 1] = 0xf2;
+                else
+                    arr[*curr_length + 1] = 0xf1;
+                *curr_length += 2;
+            }
+            else
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x89;
+                if (idx0 == 3)
+                    arr[*curr_length + 2] = 0xf0;
+                else
+                    arr[*curr_length + 2] = 0xf1;
+                *curr_length += 3;
             }
         }
     }
@@ -559,6 +555,7 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
     }
 }
 
+// parameter manipulation functions
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
     switch (idx0)
@@ -647,6 +644,7 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
     return;
 }
 
+// aux functions
 static void error(const char *msg, int line)
 {
     fprintf(stderr, "erro %s na linha %d\n", msg, line);
