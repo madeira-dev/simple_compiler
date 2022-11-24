@@ -24,6 +24,9 @@ void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int
 // parameter manipulation
 void par_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
+void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
+void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
+void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
 
 // aux
 static void error(const char *msg, int line);
@@ -555,6 +558,12 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
     }
 }
 
+void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+
+void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+
+void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+
 // parameter manipulation functions
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
@@ -631,6 +640,419 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 else
                     arr[*arr_size + 2] = 0xc7;
                 *arr_size += 3;
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return;
+}
+
+void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
+{
+    switch (idx0)
+    {
+    case 1:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p1 -= p1
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xff;
+                *arr_size = (*arr_size) + 2;
+            }
+            else if (idx1 == 2) // p1 -= p2
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xf7;
+                *arr_size = (*arr_size) + 2;
+            }
+        }
+
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p1 -= v1
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xd7;
+                *arr_size = (*arr_size) + 2;
+                break;
+            }
+            case 2: // p1 -= v2
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xcf;
+                *arr_size = (*arr_size) + 2;
+                break;
+            }
+            case 3: // p1 -= v3
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x29;
+                arr[(*arr_size) + 2] = 0xc7;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 4: // p1 -= v4
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x29;
+                arr[(*arr_size) + 2] = 0xcf;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            default:
+                break;
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+    case 2:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p2 -= p1
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xfe;
+                *arr_size = (*arr_size) + 2;
+            }
+            else if (idx1 == 2) // p2 -= p2
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xf6;
+                *arr_size = (*arr_size) + 2;
+            }
+        }
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p2-= v1
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xd6;
+                *arr_size = (*arr_size) + 2;
+                break;
+            }
+            case 2: // p2 -= v2
+            {
+                arr[*arr_size] = 0x29;
+                arr[(*arr_size) + 1] = 0xce;
+                *arr_size = (*arr_size) + 2;
+                break;
+            }
+            case 3: // p2 -= v3
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x29;
+                arr[(*arr_size) + 2] = 0xc6;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 4: // p2 -= v4
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x29;
+                arr[(*arr_size) + 2] = 0xce;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            break;
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return;
+}
+
+void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
+{
+    switch (idx0)
+    {
+    case 1:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p1 *= p1
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xff;
+                *arr_size = (*arr_size) + 3;
+            }
+            else if (idx1 == 2) // p1 *= p2
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xfe;
+                *arr_size = (*arr_size) + 3;
+            }
+        }
+
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p1 *= v1
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xfa;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 2: // p1 *= v2
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xf9;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 3: // p1 *= v3
+            {
+                arr[*arr_size] = 0x41;
+                arr[(*arr_size) + 1] = 0x0f;
+                arr[(*arr_size) + 2] = 0xaf;
+                arr[(*arr_size) + 3] = 0xf8;
+                *arr_size = (*arr_size) + 4;
+                break;
+            }
+            case 4: // p1 *= v4
+            {
+                arr[*arr_size] = 0x41;
+                arr[(*arr_size) + 1] = 0x0f;
+                arr[(*arr_size) + 2] = 0xaf;
+                arr[(*arr_size) + 3] = 0xf9;
+                *arr_size = (*arr_size) + 4;
+
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+
+    case 2:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p2 *= p1
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xf7;
+                *arr_size = (*arr_size) + 3;
+            }
+            else if (idx1 == 2) // p2 *= p2
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xf6;
+                *arr_size = (*arr_size) + 3;
+            }
+        }
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p2*= v1
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xf2;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 2: // p2 *= v2
+            {
+                arr[*arr_size] = 0x0f;
+                arr[(*arr_size) + 1] = 0xaf;
+                arr[(*arr_size) + 2] = 0xf1;
+                *arr_size = (*arr_size) + 3;
+                break;
+            }
+            case 3: // p2 *= v3
+            {
+                arr[*arr_size] = 0x41;
+                arr[(*arr_size) + 1] = 0x0f;
+                arr[(*arr_size) + 2] = 0xaf;
+                arr[(*arr_size) + 3] = 0xf0;
+                *arr_size = (*arr_size) + 4;
+                break;
+            }
+            case 4: // p2 *= v4
+            {
+                arr[*arr_size] = 0x41;
+                arr[(*arr_size) + 1] = 0x0f;
+                arr[(*arr_size) + 2] = 0xaf;
+                arr[(*arr_size) + 3] = 0xf1;
+                *arr_size = (*arr_size) + 4;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            break;
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    return;
+}
+
+void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
+{
+    switch (idx0)
+    {
+    case 1:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p1 := p1
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xff;
+                (*arr_size) += 2;
+            }
+            else if (idx1 == 2) // p1 := p2
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xf7;
+                (*arr_size) += 2;
+            }
+        }
+
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p1 := v1
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xd7;
+                break;
+            }
+            case 2: // p1 := v2
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xcf;
+                break;
+            }
+            case 3: // p1 := v3
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x89;
+                arr[(*arr_size) + 2] = 0xc7;
+                break;
+            }
+            case 4: // p1 := v4
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x89;
+                arr[(*arr_size) + 2] = 0xcf;
+
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            }
+        }
+        else if (var1 == '$')
+        {
+        }
+        break;
+    }
+
+    case 2:
+    {
+        if (var1 == 'p')
+        {
+            if (idx1 == 1) // p2 := p1
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xfe;
+            }
+            else if (idx1 == 2) // p2 := p2
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xf6;
+            }
+        }
+        else if (var1 == 'v')
+        {
+            switch (idx1)
+            {
+            case 1: // p2+= v1
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xd6;
+                break;
+            }
+            case 2: // p2 += v2
+            {
+                arr[*arr_size] = 0x89;
+                arr[(*arr_size) + 1] = 0xce;
+
+                break;
+            }
+            case 3: // p2 += v3
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x89;
+                arr[(*arr_size) + 2] = 0xc6;
+                break;
+            }
+            case 4: // p2 += v4
+            {
+                arr[*arr_size] = 0x44;
+                arr[(*arr_size) + 1] = 0x89;
+                arr[(*arr_size) + 2] = 0xce;
+                break;
+            }
+            default:
+            {
+                break;
+            }
+            break;
             }
         }
         else if (var1 == '$')
