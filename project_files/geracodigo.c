@@ -40,6 +40,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
 static void error(const char *msg, int line);
 int string2num(char *s, int base);
 void cmp(unsigned char arr[], int *arr_size, char var0, int idx0);
+void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[]);
 
 /* code */
 funcp geraCodigo(FILE *f, unsigned char codigo[])
@@ -47,7 +48,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     funcp func;
     int line = 1;
     int lineAux = line - 1;
-    int end_arr[LIN];
+    unsigned char end_arr[LIN];
     int c, curr_length = 24, aux_curr_length = 0, count_if_n_go = 0; /* curr_length: variavel para contar espaços já preenchidos com código de máquina do array */
     unsigned char tmp_arr[ARR_SIZE] = {0x55,                         /* array inicializado com codigos de maquina de: iniciar ra, abrir espaco no ra e alocar variaveis locais */
                                        0x48, 0x89, 0xe5,
@@ -208,8 +209,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         line++;
         fscanf(f, " ");
     }
-
-
+    preenche_vazios(vetor_ends, count_if_n_go, end_arr, lineAux + 1 , tmp_arr);
     func = (funcp)codigo;
     return func;
 }
@@ -1484,7 +1484,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
     }
 }
 
-void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, int end_arr[], int lines, unsigned char arr[])
+void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[])
 {
     int i, j;
     unsigned char conta, end_linha;
