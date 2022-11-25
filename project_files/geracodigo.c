@@ -13,9 +13,9 @@ typedef int (*funcp)();
 // struct pra guardar posicoes do if e do go
 typedef struct End_if_go
 {
-    unsigned char cod_maq_if_go; // guardo o codigo de maquina de onde comeca o if / go para depois fazer a conta
-    unsigned char pos_if_go; // indice do tmp array onde if / go comeca 
-    unsigned char jmp_less_line; // se for um if guardo a linha do jmp less / se for um go guardo a linha do jmp
+    unsigned char cod_maq_if_go;  // guardo o codigo de maquina de onde comeca o if / go para depois fazer a conta
+    unsigned char pos_if_go;      // indice do tmp array onde if / go comeca
+    unsigned char jmp_less_line;  // se for um if guardo a linha do jmp less / se for um go guardo a linha do jmp
     unsigned char jmp_equal_line; // se for um if guardo a linha do jmp equal / se for um go aqui fica negativo
 } End_if_go;
 
@@ -166,9 +166,9 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             printf("%d if %c%d %d %d\n", line, var0, idx0, n1, n2); /* machine code de cmp em assembly */
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
             vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do if
-            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1; // indice do if no vetor tmp arr
-            vetor_ends[count_if_n_go].jmp_less_line = n1; // guardo a linha que tenho que ir se for less
-            vetor_ends[count_if_n_go].jmp_equal_line = n2; // guardo a linha que eu tenho que ir se for equal
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1;              // indice do if no vetor tmp arr
+            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que ir se for less
+            vetor_ends[count_if_n_go].jmp_equal_line = n2;                          // guardo a linha que eu tenho que ir se for equal
 
             lineAux += 1;
             count_if_n_go += 1;
@@ -188,14 +188,13 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             if (fscanf(f, "o %d", &n1) != 1)
                 error("comando invalido", line);
 
-
             printf("%d go %d\n", line, n1); /* machine code de jmp em assembly */
 
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
             vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do go
             vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1;              // indice do if no vetor tmp arr
-            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que pular 
-            vetor_ends[count_if_n_go].jmp_equal_line = -1;                          // -1 porque nao tem jump equal 
+            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que pular
+            vetor_ends[count_if_n_go].jmp_equal_line = -1;                          // -1 porque nao tem jump equal
 
             lineAux += 1;
             count_if_n_go += 1;
@@ -209,7 +208,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         line++;
         fscanf(f, " ");
     }
-    preenche_vazios(vetor_ends, count_if_n_go, end_arr, lineAux + 1 , tmp_arr);
+    preenche_vazios(vetor_ends, count_if_n_go, end_arr, lineAux + 1, tmp_arr);
     func = (funcp)codigo;
     return func;
 }
@@ -434,11 +433,12 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
     }
 }
 
+// tem q completar aqui
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
     if (var1 == '$') /* constante */
     {
-        switch (idx0) /* verificando o valor da constante */
+        switch (idx0)
         {
         case 1:
             arr[*curr_length] = 0x83;
@@ -449,8 +449,14 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
             arr[*curr_length + 1] = 0xc1;
             break;
         case 3:
+            arr[*curr_length] = 0x41;
+            arr[*curr_length + 1] = 0x83;
+            arr[*curr_length + 2] = 0xc0;
             break;
         case 4:
+            arr[*curr_length] = 0x41;
+            arr[*curr_length + 1] = 0x83;
+            arr[*curr_length + 2] = 0xc1;
             break;
         default:
             break;
@@ -980,6 +986,9 @@ void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
         }
         else if (var1 == '$')
         {
+            char aux_arr[20];
+            sprintf(aux_arr, "%x", idx1);
+            int tmp_int = string2num(aux_arr, 16);
         }
         break;
     }
@@ -1493,39 +1502,41 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
 {
     int i, j;
     unsigned char conta, end_linha;
-    for(i = 0; i < tam_vetor_ends; i++) // enquanto ainda houver um if ou go para tratar 
+    for (i = 0; i < tam_vetor_ends; i++) // enquanto ainda houver um if ou go para tratar
     {
         j = vetor_ends[i].pos_if_go; // j pega indice do if / go no vetor tmp arr
         // ando no vetor ate encontrar um dos codigos de maquina do jmp jl ou je
-        while (arr[j] != 0x7c /*&& arr[j] != 0x74*/ && arr[j] != 0xeb) 
-                j++;
+        while (arr[j] != 0x7c /*&& arr[j] != 0x74*/ && arr[j] != 0xeb)
+            j++;
         // vejo qual dos casos eh
         if (arr[j] == 0xeb) // encontrei o jmp incondicional
         {
             // endereco do jmp - endereco da linha que ele quer pular
-            // em vetor_end.jmp_less_line esta guardado um inteiro com a linha que se deseja ir 
+            // em vetor_end.jmp_less_line esta guardado um inteiro com a linha que se deseja ir
             // o endereco da primeira instrucao de tal linha esta no end_arr
-            // linha 1 esta na posicao 0 do end arr por isso o -1 
+            // linha 1 esta na posicao 0 do end arr por isso o -1
             end_linha = end_arr[vetor_ends[i].jmp_less_line - 1];
-            conta = arr[j] - end_linha;
+            conta = end_linha - arr[j];
             j++;
             arr[j] = conta;
         }
-        else/* (rr[j] == 0x7c) // encontrei jl  */
+        else /* (rr[j] == 0x7c) // encontrei jl  */
         {
             end_linha = end_arr[vetor_ends[i].jmp_less_line - 1];
-            conta = arr[j] - end_linha;
+            conta = end_linha - arr[j];
+
             j++;
             arr[j] = conta;
             // acaba jump less
-            j++
+            j++;
             end_linha = end_arr[vetor_ends[i].jmp_equal_line - 1];
-            conta = arr[j] - end_linha;
+            conta = end_linha - arr[j];
+
             j++;
             arr[j] = conta;
         }
         /*
-        else // je  
+        else // je
         {
             end_linha = end_arr[vetor_ends[i].jmp_equal_line - 1];
             conta = arr[j] - end_linha;
@@ -1535,5 +1546,4 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
         */
     }
     return;
-
 }
