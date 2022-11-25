@@ -9,7 +9,7 @@ test:
     leaq -16(%rbp), %r8 /* terceira variavel local */
     leaq -8(%rbp), %r9 /* quarta variavel local */
 
-    addl %edi, %r9d
+    addl $5, %r9d
 
 FIM:
     leave

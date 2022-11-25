@@ -263,9 +263,9 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
     // verificando segunda variavel/constante/parametro
     if (var1 == '$') /* constante */
     {
-        char tmp_arr[20];
-        sprintf(tmp_arr, "%x", idx1);
-        int tmp_int = string2num(tmp_arr, 16);
+        char aux_arr[20];
+        sprintf(aux_arr, "%x", idx1);
+        int tmp_int = string2num(aux_arr, 16);
 
         switch (idx0) /* verificando o valor da primeira variavel */
         {
@@ -441,8 +441,12 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
         switch (idx0) /* verificando o valor da constante */
         {
         case 1:
+            arr[*curr_length] = 0x83;
+            arr[*curr_length + 1] = 0xc2;
             break;
         case 2:
+            arr[*curr_length] = 0x83;
+            arr[*curr_length + 1] = 0xc1;
             break;
         case 3:
             break;
@@ -546,28 +550,28 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
             break;
         }
     }
-
     else if (var1 == 'p') /* parametro */
     {
         if (idx1 == 1) /* verificando id do parametro */
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*curr_length] = 0x01;
                 if (idx0 == 1) /* primeira variavel == primeira variavel local */
-                {
-                }
+                    arr[*curr_length + 1] = 0xfa;
                 else /* primeira variavel == segunda variavel local */
-                {
-                }
+                    arr[*curr_length + 1] = 0xf9;
+                *curr_length += 2;
             }
             else
             {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x01;
                 if (idx0 == 3) /* primeira variavel == terceira variavel local */
-                {
-                }
+                    arr[*curr_length + 2] = 0xf8;
                 else /* primeira variavel == quarta variavel local */
-                {
-                }
+                    arr[*curr_length + 2] = 0xf9;
+                *curr_length += 3;
             }
         }
 
@@ -575,21 +579,22 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*curr_length] = 0x01;
                 if (idx0 == 1) /* primeira variavel == primeira variavel local */
-                {
-                }
+                    arr[*curr_length + 1] = 0xf2;
                 else /* primeira variavel == segunda variavel local */
-                {
-                }
+                    arr[*curr_length + 1] = 0xf1;
+                *curr_length += 2;
             }
             else
             {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x01;
                 if (idx0 == 3) /* primeira variavel == terceira variavel local */
-                {
-                }
+                    arr[*curr_length + 2] = 0xf0;
                 else /* primeira variavel == quarta variavel local */
-                {
-                }
+                    arr[*curr_length + 2] = 0xf1;
+                *curr_length += 3;
             }
         }
     }
@@ -1447,7 +1452,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
         else
             arr[*arr_size + 1] = 0xfe;
         arr[*arr_size + 2] = 0x00;
-        arr[*arr_size + 3] = 0x7e;
+        arr[*arr_size + 3] = 0x7c;
         arr[*arr_size + 5] = 0x74;
         *arr_size += 6;
         break;
@@ -1460,7 +1465,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
             else
                 arr[*arr_size + 1] = 0xf9;
             arr[*arr_size + 2] = 0x00;
-            arr[*arr_size + 3] = 0x7e;
+            arr[*arr_size + 3] = 0x7c;
             arr[*arr_size + 5] = 0x74;
             *arr_size += 6;
         }
@@ -1477,7 +1482,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
                 arr[*arr_size + 2] = 0xf9;
             }
             arr[*arr_size + 3] = 0x00;
-            arr[*arr_size + 4] = 0x7e;
+            arr[*arr_size + 4] = 0x7c;
             arr[*arr_size + 6] = 0x74;
             *arr_size += 7;
         }
