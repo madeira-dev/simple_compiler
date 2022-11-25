@@ -40,6 +40,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
 static void error(const char *msg, int line);
 int string2num(char *s, int base);
 void cmp(unsigned char arr[], int *arr_size, char var0, int idx0);
+void go(unsigned char arr[], int *arr_size);
 void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[]);
 
 /* code */
@@ -135,14 +136,16 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
-                // par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
                 break;
             case '+':
                 par_add_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 break;
             case '-':
+                par_sub_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 break;
             case '*':
+                par_mult_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 break;
             default:
                 error("operação inválida", line);
@@ -163,6 +166,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             if (fscanf(f, "f %c%d %d %d", &var0, &idx0, &n1, &n2) != 4)
                 error("comando invalido", line);
 
+            cmp(tmp_arr, &curr_length, var0, idx0);
             printf("%d if %c%d %d %d\n", line, var0, idx0, n1, n2); /* machine code de cmp em assembly */
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
             vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do if
@@ -188,6 +192,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             if (fscanf(f, "o %d", &n1) != 1)
                 error("comando invalido", line);
 
+            go(tmp_arr, &curr_length);
             printf("%d go %d\n", line, n1); /* machine code de jmp em assembly */
 
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
@@ -1498,6 +1503,13 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
     }
 }
 
+void go(unsigned char arr[], int *arr_size)
+{
+    arr[*arr_size] = 0xeb;
+    *arr_size += 2;
+    return;
+}
+
 void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[])
 {
     int i, j;
@@ -1524,14 +1536,12 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
         {
             end_linha = end_arr[vetor_ends[i].jmp_less_line - 1];
             conta = end_linha - arr[j];
-
             j++;
             arr[j] = conta;
             // acaba jump less
             j++;
             end_linha = end_arr[vetor_ends[i].jmp_equal_line - 1];
             conta = end_linha - arr[j];
-
             j++;
             arr[j] = conta;
         }
