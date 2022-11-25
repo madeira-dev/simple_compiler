@@ -11,10 +11,12 @@
 /* typedef */
 typedef int (*funcp)();
 // struct pra guardar posicoes do if e do go
-typedef struct _End_if_go
+typedef struct End_if_go
 {
-    unsigned char pos_if;
-    unsigned char pos_go;
+    unsigned char cod_maq_if_go; // guardo o codigo de maquina de onde comeca o if / go para depois fazer a conta
+    unsigned char pos_if_go; // indice do tmp array onde if / go comeca 
+    unsigned char jmp_less_line; // se for um if guardo a linha do jmp less / se for um go guardo a linha do jmp
+    unsigned char jmp_equal_line; // se for um if guardo a linha do jmp equal / se for um go aqui fica negativo
 } End_if_go;
 
 /* functions prototypes */
@@ -38,6 +40,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
 static void error(const char *msg, int line);
 int string2num(char *s, int base);
 void cmp(unsigned char arr[], int *arr_size, char var0, int idx0);
+void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[]);
 
 /* code */
 funcp geraCodigo(FILE *f, unsigned char codigo[])
@@ -45,7 +48,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     funcp func;
     int line = 1;
     int lineAux = line - 1;
-    int end_arr[LIN];
+    unsigned char end_arr[LIN];
     int c, curr_length = 24, aux_curr_length = 0, count_if_n_go = 0; /* curr_length: variavel para contar espaços já preenchidos com código de máquina do array */
     unsigned char tmp_arr[ARR_SIZE] = {0x55,                         /* array inicializado com codigos de maquina de: iniciar ra, abrir espaco no ra e alocar variaveis locais */
                                        0x48, 0x89, 0xe5,
@@ -162,8 +165,13 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
 
             printf("%d if %c%d %d %d\n", line, var0, idx0, n1, n2); /* machine code de cmp em assembly */
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
-            vetor_ends[count_if_n_go].pos_if = tmp_arr[aux_curr_length + 1];
+            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do if
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1; // indice do if no vetor tmp arr
+            vetor_ends[count_if_n_go].jmp_less_line = n1; // guardo a linha que tenho que ir se for less
+            vetor_ends[count_if_n_go].jmp_equal_line = n2; // guardo a linha que eu tenho que ir se for equal
+
             lineAux += 1;
+            count_if_n_go += 1;
             break;
         }
 
@@ -180,23 +188,15 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             if (fscanf(f, "o %d", &n1) != 1)
                 error("comando invalido", line);
 
-            /* temp array pega onde a linha desejada comeca */
-            for (i = n1 - 1; i < lineAux; i++)
-            {
-                tmp_arr[curr_length] = tmp_arr[end_arr[i]];
-                length = tmp_arr[end_arr[i]];
-                while (length < end_arr[i + 1])
-                {
-                    curr_length++;
-                    length++;
-                    tmp_arr[curr_length] = tmp_arr[length];
-                }
-            }
 
             printf("%d go %d\n", line, n1); /* machine code de jmp em assembly */
 
             end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
-            vetor_ends[count_if_n_go].pos_go = tmp_arr[aux_curr_length + 1];
+            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do go
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1;              // indice do if no vetor tmp arr
+            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que pular 
+            vetor_ends[count_if_n_go].jmp_equal_line = -1;                          // -1 porque nao tem jump equal 
+
             lineAux += 1;
             count_if_n_go += 1;
             break;
@@ -209,7 +209,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         line++;
         fscanf(f, " ");
     }
-
+    preenche_vazios(vetor_ends, count_if_n_go, end_arr, lineAux + 1 , tmp_arr);
     func = (funcp)codigo;
     return func;
 }
@@ -1487,4 +1487,53 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
             *arr_size += 7;
         }
     }
+}
+
+void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char end_arr[], int lines, unsigned char arr[])
+{
+    int i, j;
+    unsigned char conta, end_linha;
+    for(i = 0; i < tam_vetor_ends; i++) // enquanto ainda houver um if ou go para tratar 
+    {
+        j = vetor_ends[i].pos_if_go; // j pega indice do if / go no vetor tmp arr
+        // ando no vetor ate encontrar um dos codigos de maquina do jmp jl ou je
+        while (arr[j] != 0x7c /*&& arr[j] != 0x74*/ && arr[j] != 0xeb) 
+                j++;
+        // vejo qual dos casos eh
+        if (arr[j] == 0xeb) // encontrei o jmp incondicional
+        {
+            // endereco do jmp - endereco da linha que ele quer pular
+            // em vetor_end.jmp_less_line esta guardado um inteiro com a linha que se deseja ir 
+            // o endereco da primeira instrucao de tal linha esta no end_arr
+            // linha 1 esta na posicao 0 do end arr por isso o -1 
+            end_linha = end_arr[vetor_ends[i].jmp_less_line - 1];
+            conta = arr[j] - end_linha;
+            j++;
+            arr[j] = conta;
+        }
+        else/* (rr[j] == 0x7c) // encontrei jl  */
+        {
+            end_linha = end_arr[vetor_ends[i].jmp_less_line - 1];
+            conta = arr[j] - end_linha;
+            j++;
+            arr[j] = conta;
+            // acaba jump less
+            j++
+            end_linha = end_arr[vetor_ends[i].jmp_equal_line - 1];
+            conta = arr[j] - end_linha;
+            j++;
+            arr[j] = conta;
+        }
+        /*
+        else // je  
+        {
+            end_linha = end_arr[vetor_ends[i].jmp_equal_line - 1];
+            conta = arr[j] - end_linha;
+            j++;
+            arr[j] = conta;
+        }
+        */
+    }
+    return;
+
 }
