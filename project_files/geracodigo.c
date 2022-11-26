@@ -23,6 +23,7 @@ typedef struct End_if_go
 // return
 void return_var(unsigned char arr[], int var_id, int *curr_length);
 void return_parameter(unsigned char arr[], int idx0, int *curr_length);
+void return_const(unsigned char arr[], int idx0, int *curr_length);
 
 // var manipulation
 void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length);
@@ -81,10 +82,16 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                     codigo[i] = tmp_arr[i];
             }
             /* caso retornar variavel */
-            else
+            else if (var0 == 'v')
             {
                 return_var(tmp_arr, idx0, &curr_length);
                 for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
+            }
+            else
+            {
+                return_const(tmp_arr, idx0, &curr_length);
+                for (int i = 0; i < curr_length; i++)
                     codigo[i] = tmp_arr[i];
             }
             printf("Curr_length depois da funcao : %d\n\n", curr_length);
@@ -313,6 +320,21 @@ void return_parameter(unsigned char arr[], int idx0, int *curr_length)
     arr[*curr_length + 2] = 0xc9;
     arr[*curr_length + 3] = 0xc3;
     *curr_length += 4;
+}
+
+void return_const(unsigned char arr[], int idx0, int *curr_length)
+{
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx0);
+    int tmp_int = string2num(aux_arr, 16);
+    arr[*curr_length] = 0xb8;
+    arr[*curr_length + 1] = (tmp_int & 0x000000ff);
+    arr[*curr_length + 2] = (tmp_int & 0x0000ff00) >> 8;
+    arr[*curr_length + 3] = (tmp_int & 0x00ff0000) >> 16;
+    arr[*curr_length + 4] = (tmp_int & 0xff000000) >> 24;
+    arr[*curr_length + 5] = 0xc9;
+    arr[*curr_length + 6] = 0xc3;
+    *curr_length += 7;
 }
 
 // variable manipulation functions
@@ -1900,7 +1922,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
         arr[*arr_size + 2] = 0x00;
         arr[*arr_size + 3] = 0x7c;
         arr[*arr_size + 5] = 0x74;
-        *arr_size += 6;
+        *arr_size += 7;
         break;
     case 'v':
         if (idx0 == 1 || idx0 == 2)
@@ -1913,7 +1935,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
             arr[*arr_size + 2] = 0x00;
             arr[*arr_size + 3] = 0x7c;
             arr[*arr_size + 5] = 0x74;
-            *arr_size += 6;
+            *arr_size += 7;
         }
         else
         {
@@ -1930,7 +1952,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
             arr[*arr_size + 3] = 0x00;
             arr[*arr_size + 4] = 0x7c;
             arr[*arr_size + 6] = 0x74;
-            *arr_size += 7;
+            *arr_size += 8;
         }
     }
 }
@@ -1947,6 +1969,8 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
     int i, j;
     unsigned char conta, end_linha;
     int linha;
+    int tmp_int;
+    char aux_arr[20];
     printf("\tENTROU NA PREENCHE_VAZIOS\n\n");
     for (i = 0; i < tam_vetor_ends; i++) // enquanto ainda houver um if ou go para tratar
     {
@@ -1960,7 +1984,6 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             printf("arr[j] : %x\n", arr[j]);
             j++;
             printf("j : %d\n", j);
-
         }
         printf("arr[j] : %x\n", arr[j]);
         // vejo qual dos casos eh
@@ -1976,13 +1999,13 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             end_linha = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
-            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
+            sprintf(aux_arr, "%x", conta);
+            tmp_int = string2num(aux_arr, 16);
+            printf("conta = end linha - arr[j] = %x\n\n", tmp_int);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
-            arr[j] = conta;
-            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
-
-
+            arr[j] = tmp_int;
+            printf("colocando o codigo de maquina que eh a conta : %x\n", arr[j]);
         }
         else /* (rr[j] == 0x7c) // encontrei jl  */
         {
@@ -1992,11 +2015,13 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             end_linha = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
-            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
+            sprintf(aux_arr, "%x", conta);
+            tmp_int = string2num(aux_arr, 16);
+            printf("conta = end linha - arr[j] = %x\n\n", tmp_int);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
-            arr[j] = conta;
-            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
+            arr[j] = tmp_int;
+            printf("colocando o codigo de maquina que eh a conta : %x\n", arr[j]);
             // acaba jump less
             j++;
             printf("esse seria o indice do je : %d\n", j);
@@ -2005,11 +2030,13 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             end_linha = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
-            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
+            sprintf(aux_arr, "%x", conta);
+            tmp_int = string2num(aux_arr, 16);
+            printf("conta = end linha - arr[j] = %x\n\n", tmp_int);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
-            arr[j] = conta;
-            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
+            arr[j] = tmp_int;
+            printf("colocando o codigo de maquina que eh a conta : %x\n", arr[j]);
         }
         /*
         else // je

@@ -9,7 +9,7 @@ test:
     leaq -16(%rbp), %r8 /* terceira variavel local */
     leaq -8(%rbp), %r9 /* quarta variavel local */
 
-    imull %edi, %r9d
+    movl $912631, %eax
 
 FIM:
     leave
