@@ -9,7 +9,7 @@ main:
     leaq -16(%rbp), %r8 /* terceira variavel local */
     leaq -8(%rbp), %r9 /* quarta variavel local */
 
-    imull $130, %esi
+    addl $-10, %edi
 
 leave
 ret
