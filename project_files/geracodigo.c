@@ -31,7 +31,7 @@ void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int 
 void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
 
 // parameter manipulation
-void par_attribute_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length);
+void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
 void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
 void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op);
@@ -85,7 +85,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 for (int i = 0; i < ARR_SIZE; i++)
                     codigo[i] = tmp_arr[i];
             }
-            end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
+            end_arr[lineAux] = tmp_arr[aux_curr_length];
             lineAux += 1;
             break;
         }
@@ -109,16 +109,24 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 break;
             case '+':
                 var_add_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             case '-':
+                var_sub_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             case '*':
+                var_mult_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             default:
                 error("operação inválida", line);
                 break;
             }
-            end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
+            end_arr[lineAux] = tmp_arr[aux_curr_length];
             lineAux += 1;
             break;
         }
@@ -136,22 +144,30 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             switch (op)
             {
             case ':':
-                par_attribute_operation(tmp_arr, var0, idx0, var1, idx1, op, &curr_length);
+                par_attribute_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             case '+':
                 par_add_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             case '-':
-                par_sub_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                // par_sub_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             case '*':
-                par_mult_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                // par_mult_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                for (int i = 0; i < ARR_SIZE; i++)
+                    codigo[i] = tmp_arr[i];
                 break;
             default:
                 error("operação inválida", line);
                 break;
             }
-            end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
+            end_arr[lineAux] = tmp_arr[aux_curr_length];
             lineAux += 1;
             break;
         }
@@ -167,15 +183,16 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 error("comando invalido", line);
 
             cmp(tmp_arr, &curr_length, var0, idx0);
-            printf("%d if %c%d %d %d\n", line, var0, idx0, n1, n2); /* machine code de cmp em assembly */
-            end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
-            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do if
-            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1;              // indice do if no vetor tmp arr
-            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que ir se for less
-            vetor_ends[count_if_n_go].jmp_equal_line = n2;                          // guardo a linha que eu tenho que ir se for equal
+            end_arr[lineAux] = tmp_arr[aux_curr_length];
+            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length]; // codigo de maquina de onde comeca a linha do if
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length;              // indice do if no vetor tmp arr
+            vetor_ends[count_if_n_go].jmp_less_line = n1;                       // guardo a linha que tenho que ir se for less
+            vetor_ends[count_if_n_go].jmp_equal_line = n2;                      // guardo a linha que eu tenho que ir se for equal
 
             lineAux += 1;
             count_if_n_go += 1;
+            for (int i = 0; i < ARR_SIZE; i++)
+                codigo[i] = tmp_arr[i];
             break;
         }
 
@@ -185,24 +202,23 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             /* quando chegar no go "chamar de novo tal linha " e reescreve o codigo de maquina */
 
             int n1; /* numero da linha to go */
-            int i;
-            int length;
             aux_curr_length = curr_length;
 
             if (fscanf(f, "o %d", &n1) != 1)
                 error("comando invalido", line);
 
             go(tmp_arr, &curr_length);
-            printf("%d go %d\n", line, n1); /* machine code de jmp em assembly */
 
-            end_arr[lineAux] = tmp_arr[aux_curr_length + 1];
-            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length + 1]; // codigo de maquina de onde comeca a linha do go
-            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length + 1;              // indice do if no vetor tmp arr
-            vetor_ends[count_if_n_go].jmp_less_line = n1;                           // guardo a linha que tenho que pular
-            vetor_ends[count_if_n_go].jmp_equal_line = -1;                          // -1 porque nao tem jump equal
+            end_arr[lineAux] = tmp_arr[aux_curr_length];
+            vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length]; // codigo de maquina de onde comeca a linha do go
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length;              // indice do if no vetor tmp arr
+            vetor_ends[count_if_n_go].jmp_less_line = n1;                       // guardo a linha que tenho que pular
+            vetor_ends[count_if_n_go].jmp_equal_line = -1;                      // -1 porque nao tem jump equal
 
             lineAux += 1;
             count_if_n_go += 1;
+            for (int i = 0; i < ARR_SIZE; i++)
+                codigo[i] = tmp_arr[i];
             break;
         }
 
@@ -438,7 +454,6 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
     }
 }
 
-// tem q completar aqui
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
     if (var1 == '$') /* constante */
@@ -446,22 +461,12 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
         switch (idx0)
         {
         case 1:
-            arr[*curr_length] = 0x83;
-            arr[*curr_length + 1] = 0xc2;
             break;
         case 2:
-            arr[*curr_length] = 0x83;
-            arr[*curr_length + 1] = 0xc1;
             break;
         case 3:
-            arr[*curr_length] = 0x41;
-            arr[*curr_length + 1] = 0x83;
-            arr[*curr_length + 2] = 0xc0;
             break;
         case 4:
-            arr[*curr_length] = 0x41;
-            arr[*curr_length + 1] = 0x83;
-            arr[*curr_length + 2] = 0xc1;
             break;
         default:
             break;
@@ -729,21 +734,22 @@ void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int 
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*array_length] = 0x29;
                 if (idx0 == 1)
-                {
-                }
+                    arr[*array_length + 1] = 0xfa;
                 else
-                {
-                }
+                    arr[*array_length + 1] = 0xf9;
+                *array_length += 2;
             }
             else
             {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x29;
                 if (idx0 == 3)
-                {
-                }
+                    arr[*array_length + 2] = 0xf8;
                 else
-                {
-                }
+                    arr[*array_length + 2] = 0xf9;
+                *array_length += 3;
             }
         }
 
@@ -751,21 +757,22 @@ void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int 
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*array_length] = 0x29;
                 if (idx0 == 1)
-                {
-                }
+                    arr[*array_length + 1] = 0xf2;
                 else
-                {
-                }
+                    arr[*array_length + 1] = 0xf1;
+                *array_length += 2;
             }
             else
             {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x29;
                 if (idx0 == 3)
-                {
-                }
+                    arr[*array_length + 2] = 0xf0;
                 else
-                {
-                }
+                    arr[*array_length + 2] = 0xf1;
+                *array_length += 3;
             }
         }
     }
@@ -797,87 +804,95 @@ void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int
         case 1:
             if (idx0 == 1 || idx0 == 2)
             {
-                arr[*array_length] = 0x29;
+                arr[*array_length] = 0x0f;
+                arr[*array_length + 1] = 0xaf;
                 if (idx0 == 1)
-                    arr[*array_length + 1] = 0xd2;
+                    arr[*array_length + 2] = 0xd2;
                 else
-                    arr[*array_length + 1] = 0xd1;
-                *array_length += 2;
+                    arr[*array_length + 2] = 0xca;
+                *array_length += 3;
             }
             else
             {
-                arr[*array_length] = 0x41;
-                arr[*array_length + 1] = 0x29;
+                arr[*array_length] = 0x44;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 3)
-                    arr[*array_length + 2] = 0xd0;
+                    arr[*array_length + 3] = 0xc2;
                 else
-                    arr[*array_length + 2] = 0xd1;
-                *array_length += 3;
+                    arr[*array_length + 3] = 0xca;
+                *array_length += 4;
             }
             break;
         case 2:
             if (idx0 == 1 || idx0 == 2)
             {
-                arr[*array_length] = 0x29;
+                arr[*array_length] = 0x0f;
+                arr[*array_length + 1] = 0xaf;
                 if (idx0 == 1)
-                    arr[*array_length + 1] = 0xca;
-                else
-                    arr[*array_length + 1] = 0xc9;
-                *array_length += 2;
-            }
-            else
-            {
-                arr[*array_length] = 0x41;
-                arr[*array_length + 1] = 0x29;
-                if (idx0 == 3)
-                    arr[*array_length + 2] = 0xc8;
+                    arr[*array_length + 2] = 0xd1;
                 else
                     arr[*array_length + 2] = 0xc9;
                 *array_length += 3;
+            }
+            else
+            {
+                arr[*array_length] = 0x44;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
+                if (idx0 == 3)
+                    arr[*array_length + 3] = 0xc1;
+                else
+                    arr[*array_length + 3] = 0xc9;
+                *array_length += 4;
             }
             break;
         case 3:
             if (idx0 == 1 || idx0 == 2)
             {
-                arr[*array_length] = 0x44;
-                arr[*array_length + 1] = 0x29;
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 1)
-                    arr[*array_length + 2] = 0xc2;
+                    arr[*array_length + 3] = 0xd0;
                 else
-                    arr[*array_length + 2] = 0xc1;
-                *array_length += 3;
+                    arr[*array_length + 3] = 0xc8;
+                *array_length += 4;
             }
             else
             {
                 arr[*array_length] = 0x45;
-                arr[*array_length + 1] = 0x29;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 3)
-                    arr[*array_length + 2] = 0xc0;
+                    arr[*array_length + 3] = 0xc0;
                 else
-                    arr[*array_length + 2] = 0xc1;
-                *array_length += 3;
+                    arr[*array_length + 3] = 0xc8;
+                *array_length += 4;
             }
             break;
         case 4:
             if (idx0 == 1 || idx0 == 2)
             {
-                arr[*array_length] = 0x44;
-                arr[*array_length + 1] = 0x29;
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 1)
-                    arr[*array_length + 2] = 0xca;
+                    arr[*array_length + 3] = 0xd1;
                 else
-                    arr[*array_length + 2] = 0xc9;
-                *array_length += 3;
+                    arr[*array_length + 3] = 0xc9;
+                *array_length += 4;
             }
             else
             {
                 arr[*array_length] = 0x45;
-                arr[*array_length + 1] = 0x29;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 3)
-                    arr[*array_length + 2] = 0xc8;
+                    arr[*array_length + 3] = 0xc1;
                 else
-                    arr[*array_length + 2] = 0xc9;
-                *array_length += 3;
+                    arr[*array_length + 3] = 0xc9;
+                *array_length += 4;
             }
         default:
             break;
@@ -889,49 +904,55 @@ void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*array_length] = 0x0f;
+                arr[*array_length + 1] = 0xaf;
                 if (idx0 == 1)
-                {
-                }
+                    arr[*array_length + 2] = 0xd7;
                 else
-                {
-                }
+                    arr[*array_length + 2] = 0xcf;
+                *array_length += 3;
             }
             else
             {
+                arr[*array_length] = 0x44;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 3)
-                {
-                }
+                    arr[*array_length + 3] = 0xc7;
                 else
-                {
-                }
+                    arr[*array_length + 3] = 0xcf;
+                *array_length += 4;
             }
         }
         else if (idx1 == 2)
         {
             if (idx0 == 1 || idx0 == 2)
             {
+                arr[*array_length] = 0x0f;
+                arr[*array_length + 1] = 0xaf;
                 if (idx0 == 1)
-                {
-                }
+                    arr[*array_length + 2] = 0xd6;
                 else
-                {
-                }
+                    arr[*array_length + 2] = 0xc7;
+                *array_length += 3;
             }
             else
             {
+                arr[*array_length] = 0x44;
+                arr[*array_length + 1] = 0x0f;
+                arr[*array_length + 2] = 0xaf;
                 if (idx0 == 3)
-                {
-                }
+                    arr[*array_length + 3] = 0xc6;
                 else
-                {
-                }
+                    arr[*array_length + 3] = 0xce;
+                *array_length += 4;
             }
         }
     }
 }
 
 // parameter manipulation functions
-void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
+void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
     switch (idx0)
     {
@@ -994,6 +1015,13 @@ void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
             char aux_arr[20];
             sprintf(aux_arr, "%x", idx1);
             int tmp_int = string2num(aux_arr, 16);
+
+            arr[*arr_size] = 0xbf;
+            arr[*arr_size + 1] = (tmp_int & 0x000000ff);
+            arr[*arr_size + 2] = (tmp_int & 0x0000ff00) >> 8;
+            arr[*arr_size + 3] = (tmp_int & 0x00ff0000) >> 16;
+            arr[*arr_size + 4] = (tmp_int & 0xff000000) >> 24;
+            *arr_size += 5;
         }
         break;
     }
@@ -1052,6 +1080,16 @@ void par_attr_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
         }
         else if (var1 == '$')
         {
+            char aux_arr[20];
+            sprintf(aux_arr, "%x", idx1);
+            int tmp_int = string2num(aux_arr, 16);
+
+            arr[*arr_size] = 0xbe;
+            arr[*arr_size + 1] = (tmp_int & 0x000000ff);
+            arr[*arr_size + 2] = (tmp_int & 0x0000ff00) >> 8;
+            arr[*arr_size + 3] = (tmp_int & 0x00ff0000) >> 16;
+            arr[*arr_size + 4] = (tmp_int & 0xff000000) >> 24;
+            *arr_size += 5;
         }
         break;
     }
@@ -1471,7 +1509,7 @@ void cmp(unsigned char arr[], int *arr_size, char var0, int idx0) /* codigo de m
         *arr_size += 6;
         break;
     case 'v':
-        if (idx0 == 1 | idx0 == 2)
+        if (idx0 == 1 || idx0 == 2)
         {
             arr[*arr_size] = 0x83;
             if (idx0 == 1)
