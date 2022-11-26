@@ -397,23 +397,18 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
 
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
-    /* verificando o que esta sendo somado à variável */
     if (var1 == '$') /* constante */
     {
         /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com a constante */
         switch (idx0) /* verificando o valor da constante */
         {
         case 1:
-            unsigned char var1_manip_add_const[50];
             break;
         case 2:
-            unsigned char var2_manip_add_const[50];
             break;
         case 3:
-            unsigned char var3_manip_add_const[50];
             break;
         case 4:
-            unsigned char var4_manip_add_const[50];
             break;
         default:
             break;
@@ -424,89 +419,92 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
     {
         switch (idx1) /* verificando id da segunda variavel */
         {
-        case 1:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com primeira variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+        case 1: /* segunda variavel == primeira variavel local */
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_add_var1[] = {0x01, 0xd2};
-                break;
-            case 2:
-                unsigned char var2_manip_add_var1[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_add_var1[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_add_var1[] = {};
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x01;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                    arr[*curr_length + 1] = 0xd2;
+                else /* primeira variavel == segunda variavel local */
+                    arr[*curr_length + 1] = 0xd1;
+                *curr_length += 2;
+            }
+            else
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                    arr[*curr_length + 2] = 0xd0;
+                else /* primeira variavel == quarta variavel local */
+                    arr[*curr_length + 2] = 0xd1;
+                *curr_length += 3;
             }
             break;
-        case 2:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com segunda variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+        case 2: /* segunda variavel == segunda variavel local */
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_add_var2[] = {0x01, 0xca};
-                break;
-            case 2:
-                unsigned char var2_manip_add_var2[50];
-                break;
-            case 3:
-                unsigned char var3_manip_add_var2[50];
-                break;
-            case 4:
-                unsigned char var4_manip_add_var2[50];
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x01;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                    arr[*curr_length + 1] = 0xca;
+                else /* primeira variavel == segunda variavel local */
+                    arr[*curr_length + 1] = 0xc9;
+                *curr_length += 2;
             }
-
-            break;
-        case 3:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com terceira variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
+            else
             {
-            case 1:
-                unsigned char var1_manip_add_var3[] = {0x44, 0x01, 0xc2};
-                break;
-            case 2:
-                unsigned char var2_manip_add_var3[50];
-                break;
-            case 3:
-                unsigned char var3_manip_add_var3[50];
-                break;
-            case 4:
-                unsigned char var4_manip_add_var3[50];
-                break;
-            default:
-                break;
-            }
-
-            break;
-        case 4:
-            /* verificar id da primeira variavel e colocar aqui o array correspondente a ela somada com quarta variavel */
-            switch (idx0) /* verificando o id da primeira variavel*/
-            {
-            case 1:
-                unsigned char var1_manip_add_var4[] = {0x44, 0x01, 0xca};
-                break;
-            case 2:
-                unsigned char var2_manip_add_var4[50];
-                break;
-            case 3:
-                unsigned char var3_manip_add_var4[50];
-                break;
-            case 4:
-                unsigned char var4_manip_add_var4[50];
-                break;
-            default:
-                break;
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                    arr[*curr_length + 2] = 0xc8;
+                else /* primeira variavel == quarta variavel local */
+                    arr[*curr_length + 2] = 0xc9;
+                *curr_length += 3;
             }
             break;
-
+        case 3: /* segunda variavel == terceira variavel local */
+            if (idx0 == 1 || idx0 == 2)
+            {
+                arr[*curr_length] = 0x44;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                    arr[*curr_length + 2] = 0xc2;
+                else /* primeira variavel == segunda variavel local */
+                    arr[*curr_length + 2] = 0xc1;
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x45;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                    arr[*curr_length + 2] = 0xc0;
+                else /* primeira variavel == quarta variavel local */
+                    arr[*curr_length + 2] = 0xc1;
+                *curr_length += 3;
+            }
+            break;
+        case 4: /* segunda variavel == quarta variavel local */
+            if (idx0 == 1 || idx0 == 2)
+            {
+                arr[*curr_length] = 0x44;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                    arr[*curr_length + 2] = 0xca;
+                else /* primeira variavel == segunda variavel local */
+                    arr[*curr_length + 2] = 0xc9;
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x45;
+                arr[*curr_length + 1] = 0x01;
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                    arr[*curr_length + 2] = 0xc8;
+                else /* segunda variavel == quarta variavel local */
+                    arr[*curr_length + 2] = 0xc9;
+                *curr_length += 3;
+            }
+            break;
         default:
             break;
         }
@@ -516,43 +514,45 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
     {
         if (idx1 == 1) /* verificando id do parametro */
         {
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_add_param1[] = {0x01, 0xfa};
-                break;
-            case 2:
-                unsigned char var2_manip_add_param1[] = {};
-                break;
-            case 3:
-                unsigned char var3_manip_add_param1[] = {};
-                break;
-            case 4:
-                unsigned char var4_manip_add_param1[] = {};
-                break;
-            default:
-                break;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                {
+                }
+                else /* primeira variavel == segunda variavel local */
+                {
+                }
+            }
+            else
+            {
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                {
+                }
+                else /* primeira variavel == quarta variavel local */
+                {
+                }
             }
         }
 
         else if (idx1 == 2)
         {
-            switch (idx0) /* verificando o id da primeira variavel*/
+            if (idx0 == 1 || idx0 == 2)
             {
-            case 1:
-                unsigned char var1_manip_add_param2[] = {0x01, 0xf2};
-                break;
-            case 2:
-                unsigned char var2_manip_add_param2[50];
-                break;
-            case 3:
-                unsigned char var3_manip_add_param2[50];
-                break;
-            case 4:
-                unsigned char var4_manip_add_param2[50];
-                break;
-            default:
-                break;
+                if (idx0 == 1) /* primeira variavel == primeira variavel local */
+                {
+                }
+                else /* primeira variavel == segunda variavel local */
+                {
+                }
+            }
+            else
+            {
+                if (idx0 == 3) /* primeira variavel == terceira variavel local */
+                {
+                }
+                else /* primeira variavel == quarta variavel local */
+                {
+                }
             }
         }
     }
