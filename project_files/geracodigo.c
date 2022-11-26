@@ -2019,11 +2019,12 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             printf("\tENCONTREI JL\n");
             linha = vetor_ends[i].jmp_less_line;
             printf("linha que quero ir : %d\n", linha);
-            end_linha_proc = end_arr[linha - 1];
+            end_linha_proc = end_arr[linha - 1]; // quantas instrucoes passaram ate a linha que eu quero procurar 
             printf("endereco do comeco da linha : %x\n", end_linha_proc);
-            contador_aux = vetor_ends[i].linha_txt;
-            contador_aux -= 1;
-            conta = end_linha_proc - arr[contador_aux] + 5;
+            linha = vetor_ends[i].linha_txt - 1; // linha que if / go ta dentro do arquivo -1 para encontrar o certo no vetor
+            contador_aux = end_arr[linha]; // pega quantas instrucoes tem ate o if 
+            end_linha_atual = contador_aux + 5; // quantas instrucoes tem passando a linha de instrucao do jl 
+            conta = end_linha_proc - end_linha_atual;
             printf("conta = end linha - arr[j] = %x\n\n", conta);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
@@ -2033,7 +2034,7 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             // acaba jump less
             j++;
             printf("esse seria o indice do je : %d\n", j);
-            linha = vetor_ends[i].jmp_less_line;
+            linha = vetor_ends[i].jmp_less_line; 
             printf("linha que quero ir : %d\n", linha);
             end_linha_proc = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha_proc);
