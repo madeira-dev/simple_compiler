@@ -1,3 +1,9 @@
-if p1 2 3
-ret $0
-ret $1
+v1 := $3
+if p1 8 9
+v2 := p1
+v2 *= v2
+v1 += v2
+p1 -= $1
+go 2
+ret v1
+ret p1
