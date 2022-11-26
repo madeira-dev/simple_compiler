@@ -18,7 +18,7 @@ int main(void)
     func = (funcp)geraCodigo(myfp, opcode_array);
     fclose(myfp);
 
-    check = (*func)(2, 10);
+    check = (*func)(1);
     printf("resultado: ");
     printf("%d\n", check);
 

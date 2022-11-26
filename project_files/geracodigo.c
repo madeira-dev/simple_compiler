@@ -89,7 +89,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             }
             printf("Curr_length depois da funcao : %d\n\n", curr_length);
             end_arr[lineAux] = tmp_arr[aux_curr_length];
-            printf("End_arr[%d] : %c\n", lineAux, end_arr[lineAux]);
+            printf("End_arr[%d] : %x\n", lineAux, end_arr[lineAux]);
             lineAux += 1;
             printf("Soma linhaAux ou seja pula para a proxima posicao do end_arr/ LinhaAux : %d\n", lineAux);
 
@@ -138,7 +138,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 break;
             }
             end_arr[lineAux] = tmp_arr[aux_curr_length];
-            printf("End_arr[%d] : %c\n", lineAux, end_arr[lineAux]);
+            printf("End_arr[%d] : %x\n", lineAux, end_arr[lineAux]);
             lineAux += 1;
             printf("Soma linhaAux ou seja pula para a proxima posicao do end_arr/ LinhaAux : %d\n", lineAux);
 
@@ -185,7 +185,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                 break;
             }
             end_arr[lineAux] = tmp_arr[aux_curr_length];
-            printf("End_arr[%d] : %c\n", lineAux, end_arr[lineAux]);
+            printf("End_arr[%d] : %x\n", lineAux, end_arr[lineAux]);
             lineAux += 1;
             printf("Soma linhaAux ou seja pula para a proxima posicao do end_arr/ LinhaAux : %d\n", lineAux);
             break;
@@ -197,7 +197,7 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             int n1;    /* numero da linha to go if true */
             int n2;    /* numero da linha to go if false */
             aux_curr_length = curr_length;
-            printf("\tENTROU CASO GO\n");
+            printf("\tENTROU CASO IF\n");
 
             if (fscanf(f, "f %c%d %d %d", &var0, &idx0, &n1, &n2) != 4)
                 error("comando invalido", line);
@@ -206,13 +206,13 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             cmp(tmp_arr, &curr_length, var0, idx0);
             printf("Curr_length depois da funcao : %d\n\n", curr_length);
             end_arr[lineAux] = tmp_arr[aux_curr_length];
-            printf("End_arr[%d] : %c\n", lineAux, end_arr[lineAux]);
+            printf("End_arr[%d] : %x\n", lineAux, end_arr[lineAux]);
             vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length];
-            printf("Vetor_ends[%d] codigo de maquina (if / go): %c\n", count_if_n_go, vetor_ends[count_if_n_go].cod_maq_if_go); // codigo de maquina de onde comeca a linha do if
+            printf("Vetor_ends[%d] codigo de maquina (if / go): %x\n", count_if_n_go, vetor_ends[count_if_n_go].cod_maq_if_go); // codigo de maquina de onde comeca a linha do if
             vetor_ends[count_if_n_go].pos_if_go = aux_curr_length;
-            printf("Vetor_ends[%d] posicao do if / go no tmp_arr : %d\n", count_if_n_go, vetor_ends[count_if_n_go].pos_if_go);  // indice do if no vetor tmp arr
+            printf("Vetor_ends[%d] posicao do if / go no tmp_arr : %d\n", count_if_n_go, vetor_ends[count_if_n_go].pos_if_go); // indice do if no vetor tmp arr
             vetor_ends[count_if_n_go].jmp_less_line = n1;
-            printf("Vetor_ends[%d] linha jump less : %d\n", count_if_n_go, vetor_ends[count_if_n_go].jmp_less_line);  // guardo a linha que tenho que ir se for less
+            printf("Vetor_ends[%d] linha jump less : %d\n", count_if_n_go, vetor_ends[count_if_n_go].jmp_less_line); // guardo a linha que tenho que ir se for less
             vetor_ends[count_if_n_go].jmp_equal_line = n2;
             printf("Vetor_ends[%d] linha jump equal : %d\n", count_if_n_go, vetor_ends[count_if_n_go].jmp_equal_line); // guardo a linha que eu tenho que ir se for equal
 
@@ -242,13 +242,14 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             go(tmp_arr, &curr_length);
             printf("Curr_length depois da funcao : %d\n\n", curr_length);
             end_arr[lineAux] = tmp_arr[aux_curr_length];
+            printf("End_arr[%d] : %x\n", lineAux, end_arr[lineAux]);
             vetor_ends[count_if_n_go].cod_maq_if_go = tmp_arr[aux_curr_length]; // codigo de maquina de onde comeca a linha do go
-            printf("Vetor_ends[%d] codigo de maquina (if / go): %c\n", count_if_n_go, vetor_ends[count_if_n_go].cod_maq_if_go);
-            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length;              // indice do if no vetor tmp arr
+            printf("Vetor_ends[%d] codigo de maquina (if / go): %x\n", count_if_n_go, vetor_ends[count_if_n_go].cod_maq_if_go);
+            vetor_ends[count_if_n_go].pos_if_go = aux_curr_length; // indice do if no vetor tmp arr
             printf("Vetor_ends[%d] posicao do if / go no tmp_arr : %d\n", count_if_n_go, vetor_ends[count_if_n_go].pos_if_go);
-            vetor_ends[count_if_n_go].jmp_less_line = n1;                       // guardo a linha que tenho que pular
+            vetor_ends[count_if_n_go].jmp_less_line = n1; // guardo a linha que tenho que pular
             printf("Vetor_ends[%d] linha jump less : %d\n", count_if_n_go, vetor_ends[count_if_n_go].jmp_less_line);
-            vetor_ends[count_if_n_go].jmp_equal_line = -1;                      // -1 porque nao tem jump equal
+            vetor_ends[count_if_n_go].jmp_equal_line = -1; // -1 porque nao tem jump equal
             printf("Vetor_ends[%d] linha jump equal : %d\n", count_if_n_go, vetor_ends[count_if_n_go].jmp_equal_line);
 
             lineAux += 1;
