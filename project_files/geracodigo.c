@@ -1965,7 +1965,7 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
         // vejo qual dos casos eh
         if (arr[j] == 0xeb) // encontrei o jmp incondicional
         {
-            // endereco do jmp - endereco da linha que ele quer pular
+            // endereco de onde eu quero ir - endereco de um depois do que eu estou 
             // em vetor_end.jmp_less_line esta guardado um inteiro com a linha que se deseja ir
             // o endereco da primeira instrucao de tal linha esta no end_arr
             // linha 1 esta na posicao 0 do end arr por isso o -1
@@ -1983,14 +1983,16 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
 
 
         }
-        else /* (rr[j] == 0x7c) // encontrei jl  */
+        else /* (rr[j] == 0x7c) // encontrei jl  */      
         {
+            // endereco que eu quero ir menos endereco de um depois do que eu to 
             printf("\tENCONTREI JL\n");
             linha = vetor_ends[i].jmp_less_line;
             printf("linha que quero ir : %d\n", linha);
             end_linha = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha);
-            conta = end_linha - arr[j];
+            // endereco que eu quero ir - endereco do jump equal 
+            conta = end_linha - 0x74;
             printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
@@ -2003,6 +2005,8 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             printf("linha que quero ir : %d\n", linha);
             end_linha = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha);
+
+            
             conta = end_linha - arr[j];
             printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
             j++;

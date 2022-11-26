@@ -9,8 +9,11 @@ test:
     leaq -16(%rbp), %r8 /* terceira variavel local */
     leaq -8(%rbp), %r9 /* quarta variavel local */
 
-    imull %edi, %r9d
-
+INICIO:
+    cmpl $0, %esi
+    jl FIM
+    subl $1, %edi
+    jmp INICIO
 FIM:
     leave
     ret
