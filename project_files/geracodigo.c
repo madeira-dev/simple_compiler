@@ -154,12 +154,12 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
                     codigo[i] = tmp_arr[i];
                 break;
             case '-':
-                // par_sub_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                par_sub_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 for (int i = 0; i < ARR_SIZE; i++)
                     codigo[i] = tmp_arr[i];
                 break;
             case '*':
-                // par_mult_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
+                par_mult_operation(tmp_arr, &curr_length, var0, idx0, var1, idx1, op);
                 for (int i = 0; i < ARR_SIZE; i++)
                     codigo[i] = tmp_arr[i];
                 break;
@@ -456,17 +456,92 @@ void var_attribute_operation(unsigned char arr[], char var0, int idx0, char var1
 
 void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *curr_length)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     if (var1 == '$') /* constante */
     {
         switch (idx0)
         {
-        case 1:
+        case 1: /* somando constante a primeira variavel */
+            if (idx1 < 128)
+            {
+                arr[*curr_length] = 0x83;
+                arr[*curr_length + 1] = 0xc2;
+                arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x81;
+                arr[*curr_length + 1] = 0xc2;
+                arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+                arr[*curr_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*curr_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*curr_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *curr_length += 6;
+            }
             break;
-        case 2:
+        case 2: /* somando constante a segunda variavel */
+            if (idx1 < 127)
+            {
+                arr[*curr_length] = 0x83;
+                arr[*curr_length + 1] = 0xc1;
+                arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+                *curr_length += 3;
+            }
+            else
+            {
+                arr[*curr_length] = 0x81;
+                arr[*curr_length + 1] = 0xc1;
+                arr[*curr_length + 2] = (tmp_int & 0x000000ff);
+                arr[*curr_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*curr_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*curr_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *curr_length += 6;
+            }
             break;
-        case 3:
+        case 3: /* somando constante a terceira variavel */
+            if (idx1 < 127)
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x83;
+                arr[*curr_length + 2] = 0xc0;
+                arr[*curr_length + 3] = (tmp_int & 0x000000ff);
+                *curr_length += 4;
+            }
+            else
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x81;
+                arr[*curr_length + 2] = 0xc0;
+                arr[*curr_length + 3] = (tmp_int & 0x000000ff);
+                arr[*curr_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*curr_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*curr_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *curr_length += 7;
+            }
             break;
-        case 4:
+        case 4: /* somando constante a quarta variavel */
+            if (idx1 < 127)
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x83;
+                arr[*curr_length + 2] = 0xc1;
+                arr[*curr_length + 3] = (tmp_int & 0x000000ff);
+                *curr_length += 4;
+            }
+            else
+            {
+                arr[*curr_length] = 0x41;
+                arr[*curr_length + 1] = 0x81;
+                arr[*curr_length + 2] = 0xc1;
+                arr[*curr_length + 3] = (tmp_int & 0x000000ff);
+                arr[*curr_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*curr_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*curr_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *curr_length += 7;
+            }
             break;
         default:
             break;
@@ -618,17 +693,92 @@ void var_add_operation(unsigned char arr[], char var0, int idx0, char var1, int 
 
 void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     if (var1 == '$') /* constante */
     {
         switch (idx0) /* verificando o valor da constante */
         {
-        case 1:
+        case 1: /* somando constante a primeira variavel */
+            if (idx1 < 128)
+            {
+                arr[*array_length] = 0x83;
+                arr[*array_length + 1] = 0xea;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                *array_length += 3;
+            }
+            else
+            {
+                arr[*array_length] = 0x81;
+                arr[*array_length + 1] = 0xea;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                arr[*array_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 6;
+            }
             break;
-        case 2:
+        case 2: /* somando constante a segunda variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x83;
+                arr[*array_length + 1] = 0xe9;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                *array_length += 3;
+            }
+            else
+            {
+                arr[*array_length] = 0x81;
+                arr[*array_length + 1] = 0xe9;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                arr[*array_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 6;
+            }
             break;
-        case 3:
+        case 3: /* somando constante a terceira variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x83;
+                arr[*array_length + 2] = 0xe8;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                *array_length += 4;
+            }
+            else
+            {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x81;
+                arr[*array_length + 2] = 0xe8;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                arr[*array_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 7;
+            }
             break;
-        case 4:
+        case 4: /* somando constante a quarta variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x83;
+                arr[*array_length + 2] = 0xe9;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                *array_length += 4;
+            }
+            else
+            {
+                arr[*array_length] = 0x41;
+                arr[*array_length + 1] = 0x81;
+                arr[*array_length + 2] = 0xe9;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                arr[*array_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 7;
+            }
             break;
         default:
             break;
@@ -780,17 +930,92 @@ void var_sub_operation(unsigned char arr[], char var0, int idx0, char var1, int 
 
 void var_mult_operation(unsigned char arr[], char var0, int idx0, char var1, int idx1, char op, int *array_length)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     if (var1 == '$') /* constante */
     {
         switch (idx0) /* verificando o valor da constante */
         {
-        case 1:
+        case 1: /* somando constante a primeira variavel */
+            if (idx1 < 128)
+            {
+                arr[*array_length] = 0x6b;
+                arr[*array_length + 1] = 0xd2;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                *array_length += 3;
+            }
+            else
+            {
+                arr[*array_length] = 0x69;
+                arr[*array_length + 1] = 0xd2;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                arr[*array_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 6;
+            }
             break;
-        case 2:
+        case 2: /* somando constante a segunda variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x6b;
+                arr[*array_length + 1] = 0xc9;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                *array_length += 3;
+            }
+            else
+            {
+                arr[*array_length] = 0x69;
+                arr[*array_length + 1] = 0xc9;
+                arr[*array_length + 2] = (tmp_int & 0x000000ff);
+                arr[*array_length + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 5] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 6;
+            }
             break;
-        case 3:
+        case 3: /* somando constante a terceira variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x45;
+                arr[*array_length + 1] = 0x6b;
+                arr[*array_length + 2] = 0xc0;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                *array_length += 4;
+            }
+            else
+            {
+                arr[*array_length] = 0x45;
+                arr[*array_length + 1] = 0x69;
+                arr[*array_length + 2] = 0xc0;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                arr[*array_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 7;
+            }
             break;
-        case 4:
+        case 4: /* somando constante a quarta variavel */
+            if (idx1 < 127)
+            {
+                arr[*array_length] = 0x45;
+                arr[*array_length + 1] = 0x6b;
+                arr[*array_length + 2] = 0xc9;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                *array_length += 4;
+            }
+            else
+            {
+                arr[*array_length] = 0x45;
+                arr[*array_length + 1] = 0x69;
+                arr[*array_length + 2] = 0xc9;
+                arr[*array_length + 3] = (tmp_int & 0x000000ff);
+                arr[*array_length + 4] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*array_length + 5] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*array_length + 6] = (tmp_int & 0xff000000) >> 24;
+                *array_length += 7;
+            }
             break;
         default:
             break;
@@ -1084,12 +1309,24 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
             sprintf(aux_arr, "%x", idx1);
             int tmp_int = string2num(aux_arr, 16);
 
-            arr[*arr_size] = 0xbe;
-            arr[*arr_size + 1] = (tmp_int & 0x000000ff);
-            arr[*arr_size + 2] = (tmp_int & 0x0000ff00) >> 8;
-            arr[*arr_size + 3] = (tmp_int & 0x00ff0000) >> 16;
-            arr[*arr_size + 4] = (tmp_int & 0xff000000) >> 24;
-            *arr_size += 5;
+            if (idx0 == 1)
+            {
+                arr[*arr_size] = 0xbf;
+                arr[*arr_size + 1] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 2] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 3] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 4] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 5;
+            }
+            else
+            {
+                arr[*arr_size] = 0xbe;
+                arr[*arr_size + 1] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 2] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 3] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 4] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 5;
+            }
         }
         break;
     }
@@ -1101,9 +1338,12 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
 
 void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     switch (idx0)
     {
-    case 1:
+    case 1: /* primeiro parametro */
     {
         if (var1 == 'p')
         {
@@ -1137,8 +1377,25 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 *arr_size += 3;
             }
         }
-        else if (var1 == '$')
+        else if (var1 == '$') /* somando constante no primeiro parametro */
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x83;
+                arr[*arr_size + 1] = 0xc7;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x81;
+                arr[*arr_size + 1] = 0xc7;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
@@ -1178,6 +1435,23 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
         }
         else if (var1 == '$')
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x83;
+                arr[*arr_size + 1] = 0xc6;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x81;
+                arr[*arr_size + 1] = 0xc6;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
@@ -1189,6 +1463,9 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
 
 void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     switch (idx0)
     {
     case 1:
@@ -1249,6 +1526,23 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
         }
         else if (var1 == '$')
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x83;
+                arr[*arr_size + 1] = 0xef;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x81;
+                arr[*arr_size + 1] = 0xef;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
@@ -1312,6 +1606,23 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
         }
         else if (var1 == '$')
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x83;
+                arr[*arr_size + 1] = 0xee;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x81;
+                arr[*arr_size + 1] = 0xee;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
@@ -1323,6 +1634,9 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
 
 void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0, char var1, int idx1, char op)
 {
+    char aux_arr[20];
+    sprintf(aux_arr, "%x", idx1);
+    int tmp_int = string2num(aux_arr, 16);
     switch (idx0)
     {
     case 1:
@@ -1392,6 +1706,23 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
         }
         else if (var1 == '$')
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x6b;
+                arr[*arr_size + 1] = 0xff;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x69;
+                arr[*arr_size + 1] = 0xff;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
@@ -1462,6 +1793,23 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
         }
         else if (var1 == '$')
         {
+            if (idx1 < 127)
+            {
+                arr[*arr_size] = 0x6b;
+                arr[*arr_size + 1] = 0xf6;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                *arr_size += 3;
+            }
+            else
+            {
+                arr[*arr_size] = 0x69;
+                arr[*arr_size + 1] = 0xf6;
+                arr[*arr_size + 2] = (tmp_int & 0x000000ff);
+                arr[*arr_size + 3] = (tmp_int & 0x0000ff00) >> 8;
+                arr[*arr_size + 4] = (tmp_int & 0x00ff0000) >> 16;
+                arr[*arr_size + 5] = (tmp_int & 0xff000000) >> 24;
+                *arr_size += 6;
+            }
         }
         break;
     }
