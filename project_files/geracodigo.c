@@ -83,7 +83,6 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
             /* caso retornar variavel */
             else
             {
-                /* caso retorne variavel local */
                 return_var(tmp_arr, idx0, &curr_length);
                 for (int i = 0; i < ARR_SIZE; i++)
                     codigo[i] = tmp_arr[i];
@@ -306,15 +305,12 @@ void return_var(unsigned char arr[], int idx0, int *curr_length)
 void return_parameter(unsigned char arr[], int idx0, int *curr_length)
 {
     arr[*curr_length] = 0x89;
-    /* caso seja primeiro parametro (familia rdi) */
     if (idx0 == 1)
-        arr[*curr_length + 1] = 0xf8; /* segundo byte do mov edi, eax */
-
-    /* caso seja segundo parametro (familia rsi) */
+        arr[*curr_length + 1] = 0xf8;
     else
-        arr[*curr_length + 1] = 0xf0; /* segundo byte do mov esi, eax */
-    arr[*curr_length + 2] = 0xc9;     /* leave */
-    arr[*curr_length + 3] = 0xc3;     /* ret */
+        arr[*curr_length + 1] = 0xf0;
+    arr[*curr_length + 2] = 0xc9;
+    arr[*curr_length + 3] = 0xc3;
     *curr_length += 4;
 }
 
@@ -1247,12 +1243,14 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xd7;
+                (*arr_size) += 2;
                 break;
             }
             case 2: // p1 := v2
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xcf;
+                (*arr_size) += 2;
                 break;
             }
             case 3: // p1 := v3
@@ -1260,6 +1258,7 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x89;
                 arr[(*arr_size) + 2] = 0xc7;
+                (*arr_size) += 3;
                 break;
             }
             case 4: // p1 := v4
@@ -1267,7 +1266,7 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x89;
                 arr[(*arr_size) + 2] = 0xcf;
-
+                (*arr_size) += 3;
                 break;
             }
             default:
@@ -1299,11 +1298,13 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xfe;
+                (*arr_size) += 2;
             }
             else if (idx1 == 2) // p2 := p2
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xf6;
+                (*arr_size) += 2;
             }
         }
         else if (var1 == 'v')
@@ -1314,13 +1315,14 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xd6;
+                (*arr_size) += 2;
                 break;
             }
             case 2: // p2 += v2
             {
                 arr[*arr_size] = 0x89;
                 arr[(*arr_size) + 1] = 0xce;
-
+                (*arr_size) += 2;
                 break;
             }
             case 3: // p2 += v3
@@ -1328,6 +1330,7 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x89;
                 arr[(*arr_size) + 2] = 0xc6;
+                (*arr_size) += 3;
                 break;
             }
             case 4: // p2 += v4
@@ -1335,6 +1338,7 @@ void par_attribute_operation(unsigned char arr[], int *arr_size, char var0, int 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x89;
                 arr[(*arr_size) + 2] = 0xce;
+                (*arr_size) += 3;
                 break;
             }
             default:
@@ -1389,9 +1393,9 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
         if (var1 == 'p')
         {
             arr[*arr_size] = 0x01;
-            if (idx1 == 1) // p1 += p1
+            if (idx1 == 1)
                 arr[*arr_size + 1] = 0xff;
-            else // p1 += p2
+            else
                 arr[*arr_size + 1] = 0xf7;
             *arr_size += 2;
         }
@@ -1446,9 +1450,9 @@ void par_add_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
         if (var1 == 'p')
         {
             arr[*arr_size] = 0x01;
-            if (idx1 == 1) // p2 += p1
+            if (idx1 == 1)
                 arr[*arr_size + 1] = 0xfe;
-            else // p2 += p2
+            else
                 arr[*arr_size + 1] = 0xf6;
             *arr_size += 2;
         }
@@ -1535,14 +1539,14 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xd7;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
                 break;
             }
             case 2: // p1 -= v2
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xcf;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
                 break;
             }
             case 3: // p1 -= v3
@@ -1550,7 +1554,7 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x29;
                 arr[(*arr_size) + 2] = 0xc7;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 4: // p1 -= v4
@@ -1558,7 +1562,7 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x29;
                 arr[(*arr_size) + 2] = 0xcf;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             default:
@@ -1595,13 +1599,13 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xfe;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
             }
             else if (idx1 == 2) // p2 -= p2
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xf6;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
             }
         }
         else if (var1 == 'v')
@@ -1612,14 +1616,14 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xd6;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
                 break;
             }
             case 2: // p2 -= v2
             {
                 arr[*arr_size] = 0x29;
                 arr[(*arr_size) + 1] = 0xce;
-                *arr_size = (*arr_size) + 2;
+                (*arr_size) += 2;
                 break;
             }
             case 3: // p2 -= v3
@@ -1627,7 +1631,7 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x29;
                 arr[(*arr_size) + 2] = 0xc6;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 4: // p2 -= v4
@@ -1635,7 +1639,7 @@ void par_sub_operation(unsigned char arr[], int *arr_size, char var0, int idx0, 
                 arr[*arr_size] = 0x44;
                 arr[(*arr_size) + 1] = 0x29;
                 arr[(*arr_size) + 2] = 0xce;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             default:
@@ -1689,14 +1693,14 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xff;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
             }
             else if (idx1 == 2) // p1 *= p2
             {
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xfe;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
             }
         }
 
@@ -1709,7 +1713,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xfa;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 2: // p1 *= v2
@@ -1717,7 +1721,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xf9;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 3: // p1 *= v3
@@ -1726,7 +1730,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[(*arr_size) + 1] = 0x0f;
                 arr[(*arr_size) + 2] = 0xaf;
                 arr[(*arr_size) + 3] = 0xf8;
-                *arr_size = (*arr_size) + 4;
+                (*arr_size) += 4;
                 break;
             }
             case 4: // p1 *= v4
@@ -1735,7 +1739,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[(*arr_size) + 1] = 0x0f;
                 arr[(*arr_size) + 2] = 0xaf;
                 arr[(*arr_size) + 3] = 0xf9;
-                *arr_size = (*arr_size) + 4;
+                (*arr_size) += 4;
 
                 break;
             }
@@ -1777,14 +1781,14 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xf7;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
             }
             else if (idx1 == 2) // p2 *= p2
             {
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xf6;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
             }
         }
         else if (var1 == 'v')
@@ -1796,7 +1800,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xf2;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 2: // p2 *= v2
@@ -1804,7 +1808,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[*arr_size] = 0x0f;
                 arr[(*arr_size) + 1] = 0xaf;
                 arr[(*arr_size) + 2] = 0xf1;
-                *arr_size = (*arr_size) + 3;
+                (*arr_size) += 3;
                 break;
             }
             case 3: // p2 *= v3
@@ -1813,7 +1817,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[(*arr_size) + 1] = 0x0f;
                 arr[(*arr_size) + 2] = 0xaf;
                 arr[(*arr_size) + 3] = 0xf0;
-                *arr_size = (*arr_size) + 4;
+                (*arr_size) += 4;
                 break;
             }
             case 4: // p2 *= v4
@@ -1822,7 +1826,7 @@ void par_mult_operation(unsigned char arr[], int *arr_size, char var0, int idx0,
                 arr[(*arr_size) + 1] = 0x0f;
                 arr[(*arr_size) + 2] = 0xaf;
                 arr[(*arr_size) + 3] = 0xf1;
-                *arr_size = (*arr_size) + 4;
+                (*arr_size) += 4;
                 break;
             }
             default:
