@@ -2022,8 +2022,8 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             end_linha_proc = end_arr[linha - 1];
             printf("endereco do comeco da linha : %x\n", end_linha_proc);
             contador_aux = vetor_ends[i].linha_txt;
-            contador_aux -= 1;
-            conta = end_linha_proc - arr[contador_aux] + 5;
+            contador_aux--;
+            conta = end_linha_proc - arr[contador_aux];
             printf("conta = end linha - arr[j] = %x\n\n", conta);
             j++;
             printf("esse seria o espaco vazio j++ : %d\n", j);
