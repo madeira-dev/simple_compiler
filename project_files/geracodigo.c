@@ -1942,12 +1942,22 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
     int i, j;
     unsigned char conta, end_linha;
     int linha;
+    printf("\tENTROU NA PREENCHE_VAZIOS\n\n");
     for (i = 0; i < tam_vetor_ends; i++) // enquanto ainda houver um if ou go para tratar
     {
         j = vetor_ends[i].pos_if_go; // j pega indice do if / go no vetor tmp arr
+        printf("posicao do if no tmp_arr : %d\n", vetor_ends[i].pos_if_go);
         // ando no vetor ate encontrar um dos codigos de maquina do jmp jl ou je
+        printf("j : %d\n", j);
+        printf("Procurando JMP ou JL\n");
         while (arr[j] != 0x7c /*&& arr[j] != 0x74*/ && arr[j] != 0xeb)
+        {
+            printf("arr[j] : %x\n", arr[j]);
             j++;
+            printf("j : %d\n", j);
+
+        }
+        printf("arr[j] : %x\n", arr[j]);
         // vejo qual dos casos eh
         if (arr[j] == 0xeb) // encontrei o jmp incondicional
         {
@@ -1955,26 +1965,46 @@ void preenche_vazios(End_if_go vetor_ends[], int tam_vetor_ends, unsigned char e
             // em vetor_end.jmp_less_line esta guardado um inteiro com a linha que se deseja ir
             // o endereco da primeira instrucao de tal linha esta no end_arr
             // linha 1 esta na posicao 0 do end arr por isso o -1
+            printf("\tENCONTREI JMP\n");
             linha = vetor_ends[i].jmp_less_line;
+            printf("linha que quero ir : %d\n", linha);
             end_linha = end_arr[linha - 1];
+            printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
+            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
             j++;
+            printf("esse seria o espaco vazio j++ : %d\n", j);
             arr[j] = conta;
+            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
+
+
         }
         else /* (rr[j] == 0x7c) // encontrei jl  */
         {
+            printf("\tENCONTREI JL\n");
             linha = vetor_ends[i].jmp_less_line;
+            printf("linha que quero ir : %d\n", linha);
             end_linha = end_arr[linha - 1];
+            printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
+            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
             j++;
+            printf("esse seria o espaco vazio j++ : %d\n", j);
             arr[j] = conta;
+            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
             // acaba jump less
             j++;
+            printf("esse seria o indice do je : %d\n", j);
             linha = vetor_ends[i].jmp_less_line;
+            printf("linha que quero ir : %d\n", linha);
             end_linha = end_arr[linha - 1];
+            printf("endereco do comeco da linha : %x\n", end_linha);
             conta = end_linha - arr[j];
+            printf("conta = end linha - arr[j] = %x\n\n", end_linha, arr[j], conta);
             j++;
+            printf("esse seria o espaco vazio j++ : %d\n", j);
             arr[j] = conta;
+            printf("colocando o codigo de maquina que eh a conta : %x", arr[j]);
         }
         /*
         else // je
