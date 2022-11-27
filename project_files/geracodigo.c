@@ -1,3 +1,6 @@
+/* Gabriel de Oliveira Rosa Mariano Madeira 2111471 3WB */
+/* Juliana Pinheiro dos Santos 2110516 3WB*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -6,10 +9,11 @@
 
 #define ARR_SIZE 1024  /* tamanho máximo do vetor */
 #define INIT_LENGTH 24 /* tamanho inicial do array sempre iniciado com codigo de maquina de: iniciar RA, abrir espaço no RA e alocar variáveis locais */
-#define LIN 20
+#define LIN 20         /* número máximo de linhas por arquivo */
 
 /* typedef */
 typedef int (*funcp)();
+
 // struct pra guardar posicoes do if e do go
 typedef struct End_if_go
 {
@@ -63,6 +67,11 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
     End_if_go vetor_ends[LIN];
     while ((c = fgetc(f)) != EOF)
     {
+        if (line > 20)
+        {
+            puts("numero máximo de linhas ultrapassado");
+            exit(1);
+        }
         switch (c)
         {
         case 'r': /* retorno */
@@ -239,8 +248,10 @@ funcp geraCodigo(FILE *f, unsigned char codigo[])
         fscanf(f, " ");
     }
     preenche_vazios(vetor_ends, count_if_n_go, end_arr, lineAux + 1, tmp_arr);
+
     for (int i = 0; i < ARR_SIZE; i++)
         codigo[i] = tmp_arr[i];
+
     func = (funcp)codigo;
     return func;
 }
@@ -290,6 +301,7 @@ void return_const(unsigned char arr[], int idx0, int *curr_length)
     char aux_arr[20];
     sprintf(aux_arr, "%x", idx0);
     int tmp_int = string2num(aux_arr, 16);
+
     arr[*curr_length] = 0xb8;
     arr[*curr_length + 1] = (tmp_int & 0x000000ff);
     arr[*curr_length + 2] = (tmp_int & 0x0000ff00) >> 8;
