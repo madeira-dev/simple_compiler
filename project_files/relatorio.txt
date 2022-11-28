@@ -169,3 +169,12 @@ go 3
 ret v2
 ============================
 valor de retorno: 55
+
+Teste 12:
+teste para retornar valor negativo
+valor usado em p1: -2
+============================
+p1 += $1
+ret p1
+============================
+valor de retorno: -1
