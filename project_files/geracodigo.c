@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include "geracodigo.h"
 
-#define ARR_SIZE 1024  /* tamanho máximo do vetor */
+#define ARR_SIZE 1024  /* tamanho máximo do vetor (isso aqui pode levar a stack smashing, o valor correto é o número máximo de opcodes por linha x número máximo de linhas [acho que é 5 x 20 = 100]) */
 #define INIT_LENGTH 24 /* tamanho inicial do array sempre iniciado com codigo de maquina de: iniciar RA, abrir espaço no RA e alocar variáveis locais */
 #define LIN 20
 
