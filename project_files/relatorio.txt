@@ -1,0 +1,180 @@
+Relatório trabalho 2 software básico (compilador simples):
+Integrantes: Gabriel Madeira, Juliana Pinheiro
+
+Funções:
+	Manipulação de variáveis locais:
+		Todas as operações, atribuição, soma, subtração e multiplicação encontram-se funcionando
+		como esperado, tanto para valores positivos quanto negativos
+
+	Manipulação de parâmetros:
+		Todas as operações, atribuição, soma, subtração e multiplicação encontram-se funcionando
+		como esperado, tanto para valores positivos quanto negativos
+
+	Retorno:
+		Todos os casos de retorno, retorno de variável local, parâmetros e constante, positiva ou
+		negativa, está funcionando
+
+	Desvio incondicional:
+		O caso do 'go n1' está funcionando como esperado e desviando para a linha informada em sua chamada
+
+	Desvio condicional:
+		O caso do 'if varp n1 n2' está funcionando como esperado e de acordo com o resultado da comparação
+		de varp com 0 ele desvia para a linha desejada, seja n1 ou n2
+
+Testes realizados:
+
+Teste 1:
+valor usado em p1: 1
+============================
+p1 += $1
+ret p1
+============================
+valor de retorno: 2
+
+
+Teste 2:
+valor usado em p1: 1
+============================
+if p1 3 2
+ret $0
+ret $1
+============================
+valor de retorno: 0
+
+
+Teste 3:
+valor usado em p1: 0
+============================
+if p1 3 2
+ret $0
+ret $1
+============================
+valor de retorno: 0
+
+
+Teste 4:
+valor usado em p1: -1
+============================
+if p1 3 2
+ret $0
+ret $1
+============================
+valor de retorno: 1
+
+
+Teste 5:
+valor usado em p1: 2
+valor usado em p2: 1
+============================
+v1 := p1
+v1 += p2
+p1 -= p2
+v1 *= p1
+ret v1
+============================
+valor de retorno: 3
+
+
+Teste 6:
+valor usado em p1: 2
+============================
+v1 := $1
+if p1 6 6
+v1 *= p1
+p1 -= $1
+go 2
+ret v1
+============================
+valor de retorno: 2
+
+
+Teste 7:
+valor usado em p1: 2
+============================
+v1 := $0
+if p1 8 8
+v2 := p1
+v2 *= v2
+v1 += v2
+p1 -= $1
+go 2
+ret v1
+============================
+valor de retorno: 5
+
+
+Teste 8:
+teste realizado com o tamanho do array
+exato com o número de códigos de máquina
+usados na tradução.
+
+número de códigos de máquina usados: 37
+tamanho do array de códigos de máquina: 37
+valor usado em p1: 2
+valor usado em p2: 1
+============================
+v1 := p1
+v1 += p2
+p1 -= p2
+v1 *= p1
+ret v1
+============================
+valor de retorno: 3
+
+
+Teste 9:
+teste com números negativos
+============================
+v1 := $-5
+v2 := $-6
+v1 *= v2
+v3 := $-10
+v1 += v3
+v4 := $5
+v1 -= v4
+ret v1
+============================
+valor de retorno: 15
+
+
+Teste 10:
+teste usando vários desvios condicionais
+valor usar em p1: 2
+============================
+v1 := $1
+if v1 12 13
+v1 -= v1
+if v1 12 5
+v2 := $10
+v3 := p1
+v3 *= v2
+v3 += v1
+if v3 12 12
+v3 := $99
+ret v3
+ret $1
+ret v1
+============================
+valor de retorno: 99
+
+Teste 11:
+mais um teste com if e go
+============================
+v1 := $10
+v2 := $0
+if v1 7 7
+v2 += v1
+v1 -= $1
+go 3
+ret v2
+============================
+valor de retorno: 55
+
+Teste 12:
+teste para retornar valor negativo
+valor usado em p1: -2
+============================
+p1 += $1
+ret p1
+============================
+valor de retorno: -1
